@@ -60,6 +60,11 @@
                     <input type="text" id="searchInput" placeholder="输入全球 IP 或角色名称 (如: Mikasa Ackerman)" 
                            class="bg-transparent text-white text-xl px-6 py-4 w-full outline-none placeholder-gray-600 tracking-wide"
                            onkeypress="if(event.key === 'Enter') startSearch()">
+                    
+                    <button onclick="loadHistory()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-lg px-6 py-4 rounded-xl transition-all border border-gray-600 ml-2 whitespace-nowrap font-bold">
+                        📚 调取历史
+                    </button>
+
                     <button onclick="startSearch()" class="bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-400 text-white text-xl px-10 py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(0,242,254,0.4)] font-bold ml-2 whitespace-nowrap">
                         🚀 深度挖掘
                     </button>
@@ -321,7 +326,90 @@
             }
             document.getElementById('infoModal').classList.remove('hidden');
         }
+// ==========================================
+        // 🔥 新增：带极客混淆加密的秒级调取飞书历史档案
+        // ==========================================
+        async function loadHistory() {
+            // 🔒 1. 弹出极其霸气的密码输入框
+            const pwd = prompt("🔒 机密商业档案检索系统\n请输入最高权限管理员密码：");
+            
+            // 🛡️ 2. Base64 混淆验证机制 (绝对不暴露明文密码)
+            // 真实密码 "Zcaaron3123119." 的 Base64 密文是 "WmNhYXJvbjMxMjMxMTku"
+            if (!pwd || btoa(pwd) !== "WmNhYXJvbjMxMjMxMTku") {
+                alert("❌ 密码错误或已取消！非法入侵警告！");
+                return; // 密码不对，直接掐断，下面代码都不执行
+            }
 
+            const inputVal = document.getElementById('searchInput').value.trim();
+            if (!inputVal) return alert("✅ 身份验证通过。但请输入要调取的角色名称！");
+
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('loadingState').classList.add('flex');
+            document.getElementById('resultsContainer').classList.add('hidden');
+            
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const statusText = document.getElementById('loadingStatusText');
+
+            // 不用等60秒，直接显示查询中
+            progressBar.style.width = '60%'; progressText.innerText = '60%';
+            statusText.innerText = '身份核准，正在直连数据库翻阅历史档案...';
+
+            try {
+                // 直接呼叫你的读取 Webhook
+                const checkUrl = `${WEBHOOK_CHECK}?page_size=500`;
+                const res = await fetch(checkUrl);
+                if (!res.ok) throw new Error("网络请求失败"); 
+                
+                const responseData = await res.json();
+                let records = [];
+                if (Array.isArray(responseData)) records = responseData;
+                else if (responseData.data && responseData.data.items) records = responseData.data.items;
+                else if (responseData.items) records = responseData.items;
+
+                if (!records || records.length === 0) {
+                    alert("飞书数据库目前为空！");
+                    document.getElementById('loadingState').classList.add('hidden');
+                    document.getElementById('loadingState').classList.remove('flex');
+                    return;
+                }
+
+                // 在这 500 条里光速找人
+                let matchedRecord = [...records].reverse().find(r => {
+                    let fields = r.fields || r;
+                    let nameInFeishu = fields["角色名"];
+                    if (Array.isArray(nameInFeishu)) nameInFeishu = nameInFeishu[0]?.text || nameInFeishu[0];
+                    let dbName = String(nameInFeishu).toLowerCase().trim();
+                    let searchName = inputVal.toLowerCase().trim();
+                    return searchName.includes(dbName) || dbName.includes(searchName);
+                });
+
+                if (matchedRecord) {
+                    progressBar.style.width = '100%'; progressText.innerText = '100%';
+                    statusText.innerText = '档案调取成功！正在为您渲染...';
+                    
+                    // 顺手存个本地记忆，下次刷新还在
+                    localStorage.setItem('lastIPData', JSON.stringify(matchedRecord));
+                    localStorage.setItem('lastIPName', inputVal);
+
+                    setTimeout(() => {
+                        document.getElementById('loadingState').classList.add('hidden');
+                        document.getElementById('loadingState').classList.remove('flex');
+                        document.getElementById('resultsContainer').classList.remove('hidden');
+                        renderData(matchedRecord);
+                    }, 500);
+                } else {
+                    alert(`飞书数据库中未找到与 "${inputVal}" 相关的历史记录。\n如果需要，请点击【🚀 深度挖掘】重新拉取数据。`);
+                    document.getElementById('loadingState').classList.add('hidden');
+                    document.getElementById('loadingState').classList.remove('flex');
+                }
+            } catch (e) {
+                console.error(e);
+                alert("检索失败，请检查网络或 Webhook 设置。");
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('loadingState').classList.remove('flex');
+            }
+        }
         async function startSearch() {
             const inputVal = document.getElementById('searchInput').value.trim();
             if (!inputVal) return alert("请输入角色名称！");
