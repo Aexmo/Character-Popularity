@@ -428,7 +428,7 @@
         }
 
         // ==========================================
-        // 核心渲染逻辑
+        // 核心渲染逻辑 (已做极致兼容性升级)
         // ==========================================
         function renderData(data) {
             const verdict = data["1_Global_Verdict"] || {};
@@ -436,24 +436,38 @@
             const commercial = data["3_Commercial_Viability_Indexes"] || {};
             const attributes = data["4_Baseline_Attribute_Mining"] || {};
             const media = data["5_Media_And_Assets"] || {};
-            const trend = data["6_Popularity_Trend"] || [];
+            
+            // 兼容多种来源的趋势数据 (可能是原生的数组，也可能是拼接在别处的字符串)
+            const trend = data["6_Popularity_Trend"] || data["1年期热度走势"] || [];
 
-            // 基础面板
+            // 1. 基础面板与分数
             document.getElementById('charName').innerText = verdict.character_name || 'Unknown';
             document.getElementById('charCategory').innerText = verdict.character_category || 'N/A';
             document.getElementById('charScore').innerText = verdict.final_weighted_score || 0;
             document.getElementById('charTier').innerText = verdict.market_tier || 'N/A';
-            document.getElementById('charAvatar').src = media.main_avatar_url || 'https://via.placeholder.com/150/1f2937/8b949e?text=No+Image';
+            
+            // 头像兼容处理 (飞书对象 {link: "..."} 或 纯字符串 URL)
+            let avatarUrl = media.main_avatar_url || data["主视觉图"];
+            if (typeof avatarUrl === 'object' && avatarUrl !== null) {
+                avatarUrl = avatarUrl.link || avatarUrl.url || '';
+            } else if (Array.isArray(avatarUrl) && avatarUrl.length > 0) {
+                avatarUrl = avatarUrl[0].link || avatarUrl[0].url || '';
+            }
+            if (typeof avatarUrl === 'string' && !avatarUrl.startsWith('http')) {
+                avatarUrl = ''; // 非法链接拦截
+            }
+            document.getElementById('charAvatar').src = avatarUrl || 'https://via.placeholder.com/150/1f2937/8b949e?text=No+Image';
 
+            // 指数数据
             document.getElementById('idxTiktok').innerText = commercial.tiktok_virality_index || 0;
             document.getElementById('idxMerch').innerText = commercial.merchandise_value_index || 0;
             document.getElementById('idxSocial').innerText = commercial.social_shipping_index || 0;
 
-            // AI 深度诊断
+            // 2. AI 深度诊断 (文本直出)
             const aiDeep = attributes["G_AI_Deep_Analysis"] || {};
-            document.getElementById('aiArchetype').innerText = aiDeep.core_archetype || "暂无数据";
-            document.getElementById('aiGapMoe').innerText = aiDeep.gap_moe_selling_point || "暂无数据";
-            document.getElementById('aiEmotion').innerText = aiDeep.emotional_resonance || "暂无数据";
+            document.getElementById('aiArchetype').innerText = aiDeep.core_archetype || data['核心人设原型'] || "暂无数据";
+            document.getElementById('aiGapMoe').innerText = aiDeep.gap_moe_selling_point || data['反差萌卖点'] || "暂无数据";
+            document.getElementById('aiEmotion').innerText = aiDeep.emotional_resonance || data['受众情绪价值'] || "暂无数据";
 
             const renderAITags = (domId, arr, typeName) => {
                 document.getElementById(domId).innerHTML = (arr && arr.length > 0) 
@@ -463,32 +477,57 @@
             renderAITags('aiVisuals', aiDeep.merchandise_visual_anchors, '周边实物打样设计');
             renderAITags('aiDerivatives', aiDeep.derivative_content_direction, '短视频矩阵切片投流');
 
-            // AI 爆款热梗卡片瀑布流
-            const memes = attributes["F_AI_Viral_Memes"] || [];
-            const memesHtml = memes.map(m => `
-                <div onclick="openModal('custom', '${escapeHTML(m.en_term)} (${escapeHTML(m.zh_term)})', '数据源: TikTok/YouTube 爆款语料解析', '${escapeHTML(m.explanation)}')" 
-                     class="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30 hover:border-purple-400 hover:bg-purple-900/30 cursor-pointer transition-all hover:-translate-y-1 shadow-lg">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-xl">🔥</span>
-                        <h5 class="text-white font-bold text-base line-clamp-1">${escapeHTML(m.en_term || '未知梗')}</h5>
-                        <span class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded whitespace-nowrap">${escapeHTML(m.zh_term || '')}</span>
+            // 3. AI 爆款热梗卡片瀑布流 (超强兼容解析: 支持原生 Array 也支持飞书长文本)
+            const memesRaw = attributes["F_AI_Viral_Memes"] || data['AI 全球热梗科普'];
+            let memesHtml = '';
+            
+            if (Array.isArray(memesRaw) && memesRaw.length > 0) {
+                // 如果是原生 JSON 数组
+                memesHtml = memesRaw.map(m => `
+                    <div onclick="openModal('custom', '${escapeHTML(m.en_term)} (${escapeHTML(m.zh_term)})', '数据源: TikTok/YouTube 爆款语料解析', '${escapeHTML(m.explanation)}')" 
+                         class="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30 hover:border-purple-400 hover:bg-purple-900/30 cursor-pointer transition-all hover:-translate-y-1 shadow-lg">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xl">🔥</span>
+                            <h5 class="text-white font-bold text-base line-clamp-1">${escapeHTML(m.en_term || '未知梗')}</h5>
+                            <span class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded whitespace-nowrap">${escapeHTML(m.zh_term || '')}</span>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed line-clamp-2">${escapeHTML(m.explanation || '暂无解析')}</p>
                     </div>
-                    <p class="text-gray-400 text-sm leading-relaxed line-clamp-2">${escapeHTML(m.explanation || '暂无解析')}</p>
-                </div>
-            `).join('');
+                `).join('');
+            } else if (typeof memesRaw === 'string' && memesRaw.includes('🔥')) {
+                // 如果是飞书/Webhook传来的被拼接好的纯文本 (使用切片逻辑)
+                const memeBlocks = memesRaw.split('🔥').filter(text => text.trim() !== '');
+                memesHtml = memeBlocks.map(block => {
+                    const parts = block.split('💡');
+                    const title = parts[0] ? parts[0].trim() : "未知热梗";
+                    let explanation = parts[1] ? parts[1].trim() : "暂无解析";
+                    explanation = explanation.replace(/^解析[:：]\s*/, '').trim(); // 净化文本
+                    return `
+                        <div onclick="openModal('custom', '${escapeHTML(title)}', '数据源: 文本解析提取', '${escapeHTML(explanation)}')" 
+                             class="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30 hover:border-purple-400 hover:bg-purple-900/30 cursor-pointer transition-all hover:-translate-y-1 shadow-lg">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xl">🔥</span>
+                                <h5 class="text-white font-bold text-base line-clamp-1">${escapeHTML(title)}</h5>
+                            </div>
+                            <p class="text-gray-400 text-sm leading-relaxed line-clamp-2">${escapeHTML(explanation)}</p>
+                        </div>
+                    `;
+                }).join('');
+            }
             document.getElementById('aiMemesContainer').innerHTML = memesHtml || '<p class="text-gray-500 text-sm">暂无热梗数据，可能是数据不足或 API 提取超时。</p>';
 
-            // 原始特征标签
+            // 4. 原始特征标签
             const renderTags = (domId, arr) => {
                 document.getElementById(domId).innerHTML = (arr && arr.length > 0) 
                     ? arr.map(tag => `<span class="tag-pill" onclick="openModal('custom', '${escapeHTML(tag)}', '数据源: 智能正则图库')">${escapeHTML(tag)}</span>`).join('') 
-                    : '';
+                    : '<span class="text-gray-500 text-sm">暂无数据</span>';
             };
             renderTags('tagsVisual', attributes["A_Visual_Symbols"]);
             renderTags('tagsPersona', attributes["B_Persona_Behavior"]);
             renderTags('tagsRole', attributes["C_Role_Expertise"]);
             renderTags('tagsResonance', attributes["D_Social_Resonance"]);
 
+            // 5. 渲染图表
             renderRadarChart(radar);
             renderTrendChart(trend);
         }
@@ -537,20 +576,46 @@
             });
         }
 
-        function renderTrendChart(trendArray) {
+        function renderTrendChart(trendData) {
             const dom = document.getElementById('trendChart');
             if (trendChartInstance) trendChartInstance.dispose();
             trendChartInstance = echarts.init(dom);
 
-            let processedArray = trendArray;
-            if (!trendArray || trendArray.length < 12) {
-                processedArray = [];
+            let processedArray = [];
+            
+            // 兼容 1：如果后端传过来的是逗号拼接的字符串（如 "31,45,50,42..."）
+            if (typeof trendData === 'string' && trendData.includes(',')) {
+                const values = trendData.split(',').map(Number);
+                // 根据数组长度动态倒推周数，比如 52周前 到 本周
+                processedArray = values.map((val, idx) => {
+                    const diff = values.length - 1 - idx;
+                    return {
+                        date: diff === 0 ? '本周' : diff + '周前',
+                        score: val
+                    };
+                });
+            } 
+            // 兼容 2：如果传过来的是原生的包含对象的数组格式
+            else if (Array.isArray(trendData) && trendData.length > 0) {
+                // 处理可能存在的扁平化数字数组 [31,45,50] 或对象数组 [{score: 31}, ...]
+                processedArray = trendData.map((item, index) => {
+                    let s = typeof item === 'object' ? (item.score || 0) : Number(item);
+                    return {
+                        date: (item && item.week_index) ? item.week_index : `W${index}`,
+                        score: s
+                    };
+                });
+            }
+
+            // 兜底：如果完全没有数据或数据不足，生成一条默认斜线（保留你之前的防空逻辑）
+            if (processedArray.length === 0) {
                 const baseScore = 50;
                 for (let i = 52; i >= 0; i--) {
-                    processedArray.push({ date: i === 0 ? '本周' : (i + '周前'), score: Math.max(10, Math.min(100, baseScore - (i*0.5))).toFixed(1) });
+                    processedArray.push({ 
+                        date: i === 0 ? '本周' : (i + '周前'), 
+                        score: Math.max(10, Math.min(100, baseScore - (i*0.5))).toFixed(1) 
+                    });
                 }
-            } else {
-                processedArray = trendArray.map((item, index) => ({ date: item.week_index || `W${index}`, score: item.score }));
             }
 
             const xData = processedArray.map(item => item.date);
@@ -567,7 +632,7 @@
                 yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)' } }, axisLabel: { color: '#6b7280' } },
                 dataZoom: [{ type: 'inside', start: 0, end: 100 }, { start: 0, end: 100, height: 15, bottom: 0, borderColor: 'transparent', backgroundColor: '#0f111a', fillerColor: 'rgba(0, 242, 254, 0.2)', textStyle: { color: 'transparent' } }],
                 series: [{
-                    name: '热度趋势', type: 'line', smooth: false, symbol: 'circle', symbolSize: 4, showSymbol: false, 
+                    name: '热度趋势', type: 'line', smooth: true, symbol: 'circle', symbolSize: 4, showSymbol: false, 
                     data: yData, itemStyle: { color: '#00f2fe' },
                     lineStyle: {
                         color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [{ offset: 0, color: '#4f46e5' }, { offset: 0.5, color: '#00f2fe' }, { offset: 1, color: '#10b981' }]),
