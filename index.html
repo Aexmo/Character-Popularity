@@ -3,224 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全球 IP 商业选品总控台</title>
+    <title>IP 商业潜力雷达系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <style>
-        .neon-border { box-shadow: 0 0 10px #4f46e5, inset 0 0 10px #4f46e5; }
-        .glass-panel { background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(10px); }
+        body {
+            background-color: #0d1117; /* 极暗科技蓝背景 */
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .glass-panel {
+            background: rgba(22, 27, 34, 0.7);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+        }
+        .neon-glow {
+            box-shadow: 0 0 15px rgba(88, 101, 242, 0.4), inset 0 0 10px rgba(88, 101, 242, 0.2);
+            border: 1px solid rgba(88, 101, 242, 0.6);
+        }
+        .avatar-glow {
+            box-shadow: 0 0 30px rgba(88, 101, 242, 0.6);
+            border: 3px solid #5865f2;
+        }
+        .score-text {
+            background: -webkit-linear-gradient(45deg, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .tag-pill {
+            background: rgba(48, 54, 61, 0.8);
+            border: 1px solid #484f58;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: inline-block;
+            margin: 4px;
+            color: #8b949e;
+            transition: all 0.3s;
+        }
+        .tag-pill:hover {
+            border-color: #5865f2;
+            color: #fff;
+        }
+        /* 搜索加载动画 */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 3px solid #5865f2;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen font-sans selection:bg-indigo-500">
+<body class="min-h-screen p-6">
 
-    <header class="border-b border-gray-800 bg-gray-900 p-4 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">
-                ⚡ IP 商业潜力雷达系统
+    <div class="max-w-6xl mx-auto">
+        <header class="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+            <h1 class="text-2xl font-bold flex items-center gap-2 text-white">
+                <span class="text-indigo-500">⚡</span> IP 商业潜力雷达系统
+                <span class="text-xs bg-indigo-600 px-2 py-1 rounded text-white ml-2">v2.0 全量数据版</span>
             </h1>
-            <span class="text-xs bg-indigo-900 text-indigo-300 px-2 py-1 rounded border border-indigo-500">v2.0 全量数据版</span>
-        </div>
-    </header>
-
-    <main class="max-w-6xl mx-auto p-6 mt-4">
-        
-        <section class="glass-panel border border-gray-700 rounded-xl p-6 mb-8 shadow-2xl">
-            <h2 class="text-lg font-bold mb-4 text-gray-300">1. 目标锁定定位器</h2>
-            <div class="flex flex-col md:flex-row gap-4">
-                <input type="text" id="searchInput" placeholder="输入英文角色名 (如: Tifa Lockhart)" 
-                    class="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-lg">
-                <button id="runBtn" onclick="runEngine()" 
-                    class="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 px-8 py-3 rounded-lg font-bold text-white transition-all transform hover:scale-105 shadow-[0_0_15px_rgba(79,70,229,0.5)]">
-                    🚀 点火启动核动力挖掘
+            
+            <div class="flex w-full md:w-auto glass-panel p-1 rounded-lg">
+                <input type="text" id="searchInput" placeholder="输入角色名称 (如: Tifa Lockhart)" 
+                       class="bg-transparent text-white px-4 py-2 w-full md:w-80 outline-none"
+                       onkeypress="if(event.key === 'Enter') startSearch()">
+                <button onclick="startSearch()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-md transition-colors shadow-lg font-medium">
+                    🚀 点火挖掘
                 </button>
             </div>
-        </section>
+        </header>
 
-        <div id="loadingState" class="hidden flex flex-col items-center justify-center py-20">
-            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
-            <h3 class="text-xl font-bold text-indigo-400 animate-pulse">全网数据并发爬取与大模型分析中...</h3>
+        <div id="loadingState" class="hidden flex-col items-center justify-center py-20">
+            <div class="loader mb-4"></div>
+            <p class="text-indigo-400 animate-pulse">全网数据并发爬取与大模型分析中... (预计需 10-30 秒)</p>
         </div>
 
-        <section id="resultDashboard" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div id="resultsContainer" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            <div class="col-span-1 glass-panel border border-gray-700 rounded-xl p-6 flex flex-col items-center neon-border">
-                <img id="resAvatar" src="" alt="Avatar" class="w-48 h-48 object-cover rounded-full border-4 border-indigo-500 shadow-[0_0_20px_rgba(79,70,229,0.6)] mb-6">
-                <h2 id="resName" class="text-3xl font-black mb-1 text-white text-center">角色名</h2>
-                <p id="resCategory" class="text-gray-400 mb-6 font-mono bg-gray-800 px-3 py-1 rounded">分类</p>
+            <div class="col-span-1 glass-panel neon-glow p-6 flex flex-col items-center text-center relative overflow-hidden">
+                <div class="w-40 h-40 rounded-full avatar-glow mb-4 overflow-hidden bg-gray-800">
+                    <img id="charAvatar" src="" alt="Avatar" class="w-full h-full object-cover">
+                </div>
+                <h2 id="charName" class="text-3xl font-bold text-white mb-1">加载中</h2>
+                <span id="charCategory" class="bg-gray-700 px-3 py-1 rounded text-sm text-gray-300 mb-6">分类</span>
                 
-                <div class="w-full bg-gray-800 rounded-xl p-4 text-center border border-gray-600">
-                    <p class="text-gray-400 text-sm mb-1">综合霸权总分</p>
-                    <p id="resScore" class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-500">0</p>
-                    <p id="resTier" class="mt-2 text-sm font-bold text-yellow-400 border border-yellow-600 bg-yellow-900/30 inline-block px-3 py-1 rounded-full">评级</p>
+                <div class="w-full bg-gray-800 rounded-xl p-4 mt-auto border border-gray-700">
+                    <p class="text-sm text-gray-400 mb-1">综合霸权总分</p>
+                    <p id="charScore" class="text-6xl font-black score-text mb-2">0.0</p>
+                    <span id="charTier" class="inline-block bg-yellow-600 text-white px-4 py-1 rounded-full font-bold shadow-[0_0_10px_rgba(202,138,4,0.6)]">
+                        计算中
+                    </span>
                 </div>
             </div>
 
-            <div class="col-span-1 md:col-span-2 glass-panel border border-gray-700 rounded-xl p-6 relative">
-                <h3 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">📊 五维战力雷达盘</h3>
-                <div class="w-full h-80 flex justify-center">
-                    <canvas id="radarChart"></canvas>
-                </div>
+            <div class="col-span-1 md:col-span-2 glass-panel p-6">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">📊 五维战力雷达盘</h3>
+                <div id="radarChart" class="w-full h-64"></div>
                 
-                <div class="mt-6 grid grid-cols-3 gap-4">
-                    <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 text-center">
-                        <p class="text-xs text-gray-400">TikTok 爆款指数</p>
-                        <p id="resTiktok" class="text-xl font-bold text-pink-400">0</p>
+                <div class="grid grid-cols-3 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                        <p class="text-xs text-gray-400 mb-1">TikTok 爆款指数</p>
+                        <p id="idxTiktok" class="text-2xl font-bold text-pink-500">0</p>
                     </div>
-                    <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 text-center">
-                        <p class="text-xs text-gray-400">周边开发指数</p>
-                        <p id="resMerch" class="text-xl font-bold text-yellow-400">0</p>
+                    <div class="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                        <p class="text-xs text-gray-400 mb-1">周边开发指数</p>
+                        <p id="idxMerch" class="text-2xl font-bold text-yellow-500">0</p>
                     </div>
-                    <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 text-center">
-                        <p class="text-xs text-gray-400">CP 二创指数</p>
-                        <p id="resSocial" class="text-xl font-bold text-purple-400">0</p>
+                    <div class="bg-gray-800 p-4 rounded-lg text-center border border-gray-700">
+                        <p class="text-xs text-gray-400 mb-1">CP 二创指数</p>
+                        <p id="idxSocial" class="text-2xl font-bold text-purple-500">0</p>
                     </div>
                 </div>
             </div>
 
-            <div class="col-span-1 md:col-span-3 glass-panel border border-gray-700 rounded-xl p-6">
-                <h3 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">🧬 深度特征全量挖掘库</h3>
+            <div class="col-span-1 md:col-span-3 glass-panel p-6">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">🧬 深度特征全量挖掘库</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <p class="text-sm text-indigo-400 font-bold mb-2">👁️ 视觉符号与外观特征</p>
-                        <p id="resVisual" class="text-gray-300 text-sm leading-relaxed bg-gray-800 p-3 rounded border border-gray-700 min-h-[60px]"></p>
+                        <p class="text-sm text-indigo-400 mb-2 font-bold">👁️ 视觉符号与外观特征</p>
+                        <div id="tagsVisual" class="mb-4"></div>
+                        
+                        <p class="text-sm text-pink-400 mb-2 font-bold">🎭 性格底色与行为标签</p>
+                        <div id="tagsPersona"></div>
                     </div>
                     <div>
-                        <p class="text-sm text-pink-400 font-bold mb-2">🎭 性格底色与行为标签</p>
-                        <p id="resPersona" class="text-gray-300 text-sm leading-relaxed bg-gray-800 p-3 rounded border border-gray-700 min-h-[60px]"></p>
+                        <p class="text-sm text-green-400 mb-2 font-bold">⚔️ 角色定位与核心专长</p>
+                        <div id="tagsRole" class="mb-4"></div>
+                        
+                        <p class="text-sm text-red-400 mb-2 font-bold">❤️ 社交动态与受众共鸣</p>
+                        <div id="tagsResonance"></div>
                     </div>
-                    <div>
-                        <p class="text-sm text-green-400 font-bold mb-2">⚔️ 角色定位与核心专长</p>
-                        <p id="resRole" class="text-gray-300 text-sm leading-relaxed bg-gray-800 p-3 rounded border border-gray-700 min-h-[60px]"></p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-yellow-400 font-bold mb-2">❤️ 社交动态与受众共鸣</p>
-                        <p id="resResonance" class="text-gray-300 text-sm leading-relaxed bg-gray-800 p-3 rounded border border-gray-700 min-h-[60px]"></p>
-                    </div>
-                    <div class="md:col-span-2">
-                        <p class="text-sm text-blue-400 font-bold mb-2">📜 官方核心基础设定</p>
-                        <p id="resLore" class="text-gray-300 text-sm leading-relaxed bg-gray-800 p-3 rounded border border-gray-700 min-h-[60px]"></p>
-                    </div>
-                </div>
-                
-                <div class="mt-6 flex gap-4">
-                    <a id="linkTiktok" href="#" target="_blank" class="flex-1 bg-gray-800 hover:bg-gray-700 border border-pink-500/50 text-center py-3 rounded-lg transition-colors text-pink-400 font-bold text-sm">
-                        ▶️ 查看 TikTok 变装参考
-                    </a>
-                    <a id="linkYoutube" href="#" target="_blank" class="flex-1 bg-gray-800 hover:bg-gray-700 border border-red-500/50 text-center py-3 rounded-lg transition-colors text-red-400 font-bold text-sm">
-                        ▶️ 查看 YouTube 运镜参考
-                    </a>
                 </div>
             </div>
 
-        </section>
-    </main>
+            <div class="col-span-1 md:col-span-3 glass-panel p-6">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">📈 过去半年热度趋势分析 (Google Trends)</h3>
+                <div id="trendChart" class="w-full h-72"></div>
+            </div>
+
+        </div>
+    </div>
 
     <script>
-        // ⚠️【填入你的 Webhook 生产环境链接】
-        const N8N_WEBHOOK_URL = "https://zcaaron7.app.n8n.cloud/webhook/start_research"; 
+        // ！！！将这里的 URL 替换为你 n8n Webhook 的 Production URL 或 Test URL ！！！
+        const WEBHOOK_URL = "YOUR_N8N_WEBHOOK_URL"; 
         
-        let radarInstance = null;
+        let radarChartInstance = null;
+        let trendChartInstance = null;
 
-        async function runEngine() {
-            const charName = document.getElementById('searchInput').value.trim();
-            if(!charName) { alert("老板，总得输个名字吧！"); return; }
+        async function startSearch() {
+            const inputVal = document.getElementById('searchInput').value.trim();
+            if (!inputVal) return alert("请输入角色名称！");
 
-            document.getElementById('resultDashboard').classList.add('hidden');
+            // UI 切换：显示加载状态，隐藏旧结果
             document.getElementById('loadingState').classList.remove('hidden');
-            document.getElementById('runBtn').disabled = true;
-            document.getElementById('runBtn').innerText = "引擎运转中...";
+            document.getElementById('loadingState').classList.add('flex');
+            document.getElementById('resultsContainer').classList.add('hidden');
 
             try {
-                const response = await fetch(N8N_WEBHOOK_URL, {
+                // 发送 POST 请求给 n8n
+                const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ character: charName })
+                    body: JSON.stringify({ character: inputVal })
                 });
 
-                if(!response.ok) throw new Error("引擎响应异常！");
-
-                const result = await response.json();
+                if (!response.ok) throw new Error("网络响应失败，请检查 n8n 接口状态");
                 
-                const globalData = result['1_Global_Verdict (最终霸权评级)'];
-                const radarData = result['2_Five_Dimensional_Radar (五维基础雷达分 0-100)'];
-                const bizData = result['3_Commercial_Viability_Indexes (实战商业变现指数 0-100)'];
-                const tagData = result['4_Deep_Attribute_Mining (深度特征挖掘库)'];
-                const mediaData = result['5_Media_And_Assets (多媒体视觉库)'];
-
-                document.getElementById('resName').innerText = globalData.character_name;
-                document.getElementById('resCategory').innerText = globalData.character_category;
-                document.getElementById('resScore').innerText = globalData.final_weighted_score;
-                document.getElementById('resTier').innerText = globalData.market_tier;
+                const responseData = await response.json();
                 
-                document.getElementById('resTiktok').innerText = bizData.tiktok_virality_index;
-                document.getElementById('resMerch').innerText = bizData.merchandise_value_index;
-                document.getElementById('resSocial').innerText = bizData.social_shipping_index;
+                // n8n 代码块通常返回数组包对象: [{ json: {...} }]
+                const data = Array.isArray(responseData) ? responseData[0].json : (responseData.json || responseData);
+                
+                // 渲染数据
+                renderData(data);
 
-                // 全量写入五大数据板块
-                document.getElementById('resVisual').innerText = tagData['A_Visual_Symbols (视觉符号与外观)'].join(' | ');
-                document.getElementById('resPersona').innerText = tagData['B_Persona_Behavior (性格底色与行为)'].join(' | ');
-                document.getElementById('resRole').innerText = tagData['C_Role_Expertise (角色定位与专长)'].join(' | ');
-                document.getElementById('resResonance').innerText = tagData['D_Social_Resonance (社交动态与共鸣)'].join(' | ');
-                document.getElementById('resLore').innerText = tagData['E_Official_Lore_Data (官方核心设定)'].join(' | ');
-
-                document.getElementById('resAvatar').src = mediaData.main_avatar_url || 'https://via.placeholder.com/200?text=No+Image';
-                document.getElementById('linkTiktok').href = mediaData.tiktok_reference_link;
-                document.getElementById('linkYoutube').href = mediaData.youtube_reference_link;
-
-                drawRadarChart([
-                    radarData.community_score,
-                    radarData.visual_art_score,
-                    radarData.video_virality_score,
-                    radarData.lore_depth_score,
-                    radarData.search_trend_score
-                ]);
-
+                // UI 切换：隐藏加载，显示结果
                 document.getElementById('loadingState').classList.add('hidden');
-                document.getElementById('resultDashboard').classList.remove('hidden');
+                document.getElementById('loadingState').classList.remove('flex');
+                document.getElementById('resultsContainer').classList.remove('hidden');
 
             } catch (error) {
                 console.error(error);
-                alert("请求失败！请检查 n8n 节点是否已经将固定名字替换成了动态变量。");
-            } finally {
-                document.getElementById('runBtn').disabled = false;
-                document.getElementById('runBtn').innerHTML = "🚀 再次点火挖掘";
+                alert("请求出错：" + error.message + "\n请确保 n8n 正在监听 (Listen for test event) 或已激活。");
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('loadingState').classList.remove('flex');
             }
         }
 
-        function drawRadarChart(dataArray) {
-            const ctx = document.getElementById('radarChart').getContext('2d');
-            if(radarInstance) radarInstance.destroy();
-            radarInstance = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['社区底盘', '视觉同人', '视频破圈', '剧情厚度', '即时热度'],
-                    datasets: [{
-                        label: '战力指数',
-                        data: dataArray,
-                        backgroundColor: 'rgba(79, 70, 229, 0.4)',
-                        borderColor: 'rgba(79, 70, 229, 1)',
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: 'rgba(79, 70, 229, 1)',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(79, 70, 229, 1)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                            pointLabels: { color: '#9ca3af', font: { size: 14, family: 'sans-serif' } },
-                            ticks: { display: false, min: 0, max: 100 }
-                        }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
+        function renderData(data) {
+            // 1. 基础信息解析
+            const verdict = data["1_Global_Verdict"] || data["1_Global_Verdict (最终霸权评级)"];
+            const radar = data["2_Five_Dimensional_Radar"] || data["2_Five_Dimensional_Radar (五维基础雷达分 0-100)"];
+            const commercial = data["3_Commercial_Viability_Indexes"] || data["3_Commercial_Viability_Indexes (实战商业变现指数 0-100)"];
+            const attributes = data["4_Deep_Attribute_Mining"] || data["4_Deep_Attribute_Mining (深度特征挖掘库)"];
+            const media = data["5_Media_And_Assets"] || data["5_Media_And_Assets (多媒体视觉库)"];
+            const trend = data["6_Popularity_Trend"] || []; // 新增趋势数组
+
+            // 2. 渲染左侧面板
+            document.getElementById('charName').innerText = verdict.character_name;
+            document.getElementById('charCategory').innerText = verdict.character_category;
+            document.getElementById('charScore').innerText = verdict.final_weighted_score;
+            document.getElementById('charTier').innerText = verdict.market_tier;
+            document.getElementById('charAvatar').src = media.main_avatar_url || 'https://via.placeholder.com/150/1f2937/8b949e?text=No+Image';
+
+            // 3. 渲染商业指数
+            document.getElementById('idxTiktok').innerText = commercial.tiktok_virality_index;
+            document.getElementById('idxMerch').innerText = commercial.merchandise_value_index;
+            document.getElementById('idxSocial').innerText = commercial.social_shipping_index;
+
+            // 4. 渲染挖掘标签 (辅助函数)
+            const renderTags = (domId, arr) => {
+                document.getElementById(domId).innerHTML = arr.map(tag => `<span class="tag-pill">${tag}</span>`).join('');
+            };
+            
+            // 兼容中英文键名
+            const getAttr = (keyEn, keyCn) => attributes[keyEn] || attributes[keyCn] || ["无数据"];
+            
+            renderTags('tagsVisual', getAttr("A_Visual_Symbols", "A_Visual_Symbols (视觉符号与外观)"));
+            renderTags('tagsPersona', getAttr("B_Persona_Behavior", "B_Persona_Behavior (性格底色与行为)"));
+            renderTags('tagsRole', getAttr("C_Role_Expertise", "C_Role_Expertise (角色定位与专长)"));
+            renderTags('tagsResonance', getAttr("D_Social_Resonance", "D_Social_Resonance (社交动态与共鸣)"));
+
+            // 5. 渲染雷达图
+            renderRadarChart(radar);
+            
+            // 6. 渲染热度趋势图
+            renderTrendChart(trend);
         }
+
+        function renderRadarChart(radarData) {
+            if (!radarChartInstance) radarChartInstance = echarts.init(document.getElementById('radarChart'));
+            
+            const option = {
+                tooltip: { confine: true, backgroundColor: 'rgba(20, 20, 30, 0.9)', textStyle: { color: '#fff' } },
+                radar: {
+                    indicator: [
+                        { name: '社区底盘', max: 100 },
+                        { name: '视觉同人', max: 100 },
+                        { name: '视频破圈', max: 100 },
+                        { name: '剧情厚度', max: 100 },
+                        { name: '即时热度', max: 100 }
+                    ],
+                    shape: 'polygon',
+                    splitNumber: 4,
+                    axisName: { color: '#a0aec0' },
+                    splitLine: { lineStyle: { color: ['rgba(88, 101, 242, 0.1)', 'rgba(88, 101, 242, 0.2)', 'rgba(88, 101, 242, 0.4)', 'rgba(88, 101, 242, 0.6)'] } },
+                    splitArea: { show: false },
+                    axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }
+                },
+                series: [{
+                    type: 'radar',
+                    data: [{
+                        value: [
+                            radarData.community_score, 
+                            radarData.visual_art_score, 
+                            radarData.video_virality_score, 
+                            radarData.lore_depth_score, 
+                            radarData.search_trend_score
+                        ],
+                        name: '基础五维能力',
+                        symbol: 'circle',
+                        symbolSize: 6,
+                        itemStyle: { color: '#5865f2' },
+                        areaStyle: { color: 'rgba(88, 101, 242, 0.4)' },
+                        lineStyle: { color: '#5865f2', width: 2 }
+                    }]
+                }]
+            };
+            radarChartInstance.setOption(option);
+        }
+
+        function renderTrendChart(trendArray) {
+            if (!trendChartInstance) trendChartInstance = echarts.init(document.getElementById('trendChart'));
+
+            // 提取 X轴和Y轴数据
+            const xData = trendArray.map(item => item.date);
+            const yData = trendArray.map(item => item.score);
+
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(20, 20, 30, 0.9)',
+                    borderColor: '#00f2fe',
+                    textStyle: { color: '#fff' }
+                },
+                grid: { left: '3%', right: '4%', bottom: '5%', top: '10%', containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: xData,
+                    axisLine: { lineStyle: { color: '#30363d' } },
+                    axisLabel: { color: '#8b949e', margin: 15 }
+                },
+                yAxis: {
+                    type: 'value',
+                    splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.05)' } },
+                    axisLabel: { color: '#8b949e' }
+                },
+                series: [{
+                    name: '热度分数',
+                    type: 'line',
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 8,
+                    data: yData,
+                    itemStyle: { color: '#00f2fe', borderColor: '#fff', borderWidth: 2 },
+                    lineStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                            { offset: 0, color: '#4facfe' }, { offset: 1, color: '#00f2fe' }
+                        ]),
+                        width: 4,
+                        shadowColor: 'rgba(0, 242, 254, 0.5)',
+                        shadowBlur: 10
+                    },
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(0, 242, 254, 0.4)' },
+                            { offset: 1, color: 'rgba(0, 242, 254, 0)' }
+                        ])
+                    }
+                }]
+            };
+            trendChartInstance.setOption(option);
+        }
+
+        // 监听窗口大小改变，重绘图表使其自适应
+        window.addEventListener('resize', () => {
+            if(radarChartInstance) radarChartInstance.resize();
+            if(trendChartInstance) trendChartInstance.resize();
+        });
     </script>
 </body>
 </html>
