@@ -363,11 +363,19 @@
 
                         if (!records || records.length === 0) return;
 
-                        let matchedRecord = records.find(r => {
+                        // 🔥 核心防线升级：模糊匹配 + 寻找最新记录！
+                        // 使用 [...records].reverse() 从表格最底部（最新写入的数据）开始找
+                        let matchedRecord = [...records].reverse().find(r => {
                             let fields = r.fields || r;
                             let nameInFeishu = fields["角色名"];
                             if (Array.isArray(nameInFeishu)) nameInFeishu = nameInFeishu[0]?.text || nameInFeishu[0];
-                            return String(nameInFeishu).toLowerCase() === inputVal.toLowerCase();
+                            
+                            let dbName = String(nameInFeishu).toLowerCase().trim();
+                            let searchName = inputVal.toLowerCase().trim();
+                            
+                            // 只要飞书里的名字包含了搜索词，或者搜索词包含了飞书里的名字，都算匹配成功！
+                            // 例如: 搜索 "Hinata Hyuuga" 可以匹配到飞书里的 "Hinata"
+                            return searchName.includes(dbName) || dbName.includes(searchName);
                         });
 
                         if (matchedRecord) {
