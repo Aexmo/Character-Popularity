@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球 IP 商业选品总控台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 赛博朋克风发光效果 */
+        .neon-border { box-shadow: 0 0 10px #4f46e5, inset 0 0 10px #4f46e5; }
+        .glass-panel { background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen font-sans selection:bg-indigo-500">
+
+    <header class="border-b border-gray-800 bg-gray-900 p-4 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">
+                ⚡ IP 商业潜力雷达系统
+            </h1>
+            <span class="text-xs bg-indigo-900 text-indigo-300 px-2 py-1 rounded border border-indigo-500">v1.0.0 核心引擎在线</span>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-6 mt-4">
+        
+        <section class="glass-panel border border-gray-700 rounded-xl p-6 mb-8 shadow-2xl">
+            <h2 class="text-lg font-bold mb-4 text-gray-300">1. 目标锁定定位器</h2>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="searchInput" placeholder="输入英文角色名 (如: Frieren)" 
+                    class="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-lg">
+                <button id="runBtn" onclick="runEngine()" 
+                    class="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 px-8 py-3 rounded-lg font-bold text-white transition-all transform hover:scale-105 shadow-[0_0_15px_rgba(79,70,229,0.5)]">
+                    🚀 点火启动核动力挖掘
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">* 提示: 纯静态网页为了您的 API Key 安全，请直接输入准确的英文检索词，AI 翻译步骤已省略。</p>
+        </section>
+
+        <div id="loadingState" class="hidden flex flex-col items-center justify-center py-20">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+            <h3 class="text-xl font-bold text-indigo-400 animate-pulse">跨平台数据并发爬取中，请等待约 15-30 秒...</h3>
+        </div>
+
+        <section id="resultDashboard" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="col-span-1 glass-panel border border-gray-700 rounded-xl p-6 flex flex-col items-center neon-border">
+                <img id="resAvatar" src="" alt="Avatar" class="w-48 h-48 object-cover rounded-full border-4 border-indigo-500 shadow-[0_0_20px_rgba(79,70,229,0.6)] mb-6">
+                <h2 id="resName" class="text-3xl font-black mb-1 text-white text-center">角色名</h2>
+                <p id="resCategory" class="text-gray-400 mb-6 font-mono bg-gray-800 px-3 py-1 rounded">分类</p>
+                
+                <div class="w-full bg-gray-800 rounded-xl p-4 text-center border border-gray-600">
+                    <p class="text-gray-400 text-sm mb-1">综合霸权总分</p>
+                    <p id="resScore" class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-500">0</p>
+                    <p id="resTier" class="mt-2 text-sm font-bold text-yellow-400 border border-yellow-600 bg-yellow-900/30 inline-block px-3 py-1 rounded-full">评级</p>
+                </div>
+            </div>
+
+            <div class="col-span-1 md:col-span-2 glass-panel border border-gray-700 rounded-xl p-6 relative">
+                <h3 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">📊 五维战力雷达盘</h3>
+                <div class="w-full h-80 flex justify-center">
+                    <canvas id="radarChart"></canvas>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-3 gap-4">
+                    <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 text-center">
+                        <p class="text-xs text-gray-400">TikTok 爆款指数</p>
+                        <p id="resTiktok" class="text-xl font-bold text-pink-400">0</p>
+                    </div>
+                    <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 text-center">
+                        <p class="text-xs text-gray-400">周边开发指数</p>
+                        <p id="resMerch" class="text-xl font-bold text-yellow-400">0</p>
+                    </div>
+                    <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 text-center">
+                        <p class="text-xs text-gray-400">CP 二创指数</p>
+                        <p id="resSocial" class="text-xl font-bold text-purple-400">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-1 md:col-span-3 glass-panel border border-gray-700 rounded-xl p-6">
+                <h3 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">🧬 内容编导与选品特征库</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm text-indigo-400 font-bold mb-2">👁️ 视觉符号与外观</p>
+                        <p id="resVisual" class="text-gray-300 text-sm leading-relaxed bg-gray-800 p-3 rounded border border-gray-700"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-pink-400 font-bold mb-2">🎭 性格底色与行为</p>
+                        <p id="resPersona" class="text-gray-300 text-sm leading-relaxed bg-gray-800 p-3 rounded border border-gray-700"></p>
+                    </div>
+                </div>
+                <div class="mt-6 flex gap-4">
+                    <a id="linkTiktok" href="#" target="_blank" class="flex-1 bg-gray-800 hover:bg-gray-700 border border-pink-500/50 text-center py-3 rounded-lg transition-colors text-pink-400 font-bold text-sm">
+                        ▶️ 查看 TikTok 变装参考
+                    </a>
+                    <a id="linkYoutube" href="#" target="_blank" class="flex-1 bg-gray-800 hover:bg-gray-700 border border-red-500/50 text-center py-3 rounded-lg transition-colors text-red-400 font-bold text-sm">
+                        ▶️ 查看 YouTube 运镜参考
+                    </a>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        // ⚠️【极其重要】：把下面这个网址，换成你 n8n 里 Webhook 节点的 Production URL（生产环境链接）
+        // 例如: "https://你的n8n地址.com/webhook/start_research"
+        const N8N_WEBHOOK_URL = "替换为你的_N8N_WEBHOOK_URL"; 
+        
+        let radarInstance = null; // 存储雷达图实例
+
+        async function runEngine() {
+            const charName = document.getElementById('searchInput').value.trim();
+            if(!charName) {
+                alert("老板，总得输个名字吧！");
+                return;
+            }
+
+            // 切换到 Loading 状态
+            document.getElementById('resultDashboard').classList.add('hidden');
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('runBtn').disabled = true;
+            document.getElementById('runBtn').innerText = "引擎运转中...";
+
+            try {
+                // 发送数据到你的 n8n 引擎
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ character: charName })
+                });
+
+                if(!response.ok) throw new Error("引擎响应异常！请检查 n8n 跨域设置。");
+
+                const result = await response.json();
+                
+                // --- 解析 n8n 返回的精华 JSON ---
+                // (根据我们之前在 Final_Data 节点写的键名提取)
+                const globalData = result['1_Global_Verdict (最终霸权评级)'];
+                const radarData = result['2_Five_Dimensional_Radar (五维基础雷达分 0-100)'];
+                const bizData = result['3_Commercial_Viability_Indexes (实战商业变现指数 0-100)'];
+                const tagData = result['4_Deep_Attribute_Mining (深度特征挖掘库)'];
+                const mediaData = result['5_Media_And_Assets (多媒体视觉库)'];
+
+                // --- 将数据灌入 HTML ---
+                document.getElementById('resName').innerText = globalData.character_name;
+                document.getElementById('resCategory').innerText = globalData.character_category;
+                document.getElementById('resScore').innerText = globalData.final_weighted_score;
+                document.getElementById('resTier').innerText = globalData.market_tier;
+                
+                document.getElementById('resTiktok').innerText = bizData.tiktok_virality_index;
+                document.getElementById('resMerch').innerText = bizData.merchandise_value_index;
+                document.getElementById('resSocial').innerText = bizData.social_shipping_index;
+
+                document.getElementById('resVisual').innerText = tagData['A_Visual_Symbols (视觉符号与外观)'].join(' | ');
+                document.getElementById('resPersona').innerText = tagData['B_Persona_Behavior (性格底色与行为)'].join(' | ');
+
+                document.getElementById('resAvatar').src = mediaData.main_avatar_url || 'https://via.placeholder.com/200?text=No+Image';
+                document.getElementById('linkTiktok').href = mediaData.tiktok_reference_link;
+                document.getElementById('linkYoutube').href = mediaData.youtube_reference_link;
+
+                // --- 绘制炫酷雷达图 ---
+                drawRadarChart([
+                    radarData.community_score,
+                    radarData.visual_art_score,
+                    radarData.video_virality_score,
+                    radarData.lore_depth_score,
+                    radarData.search_trend_score
+                ]);
+
+                // 切换到结果状态
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('resultDashboard').classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                alert("请求失败！错误信息已在控制台输出。请确保 n8n Webhook 开启了 Respond to CORS。");
+            } finally {
+                // 恢复按钮
+                document.getElementById('runBtn').disabled = false;
+                document.getElementById('runBtn').innerHTML = "🚀 再次点火挖掘";
+            }
+        }
+
+        // 初始化/更新雷达图的函数
+        function drawRadarChart(dataArray) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            if(radarInstance) radarInstance.destroy(); // 销毁旧图
+
+            radarInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['社区底盘', '视觉同人', '视频破圈', '剧情厚度', '即时热度'],
+                    datasets: [{
+                        label: '战力指数',
+                        data: dataArray,
+                        backgroundColor: 'rgba(79, 70, 229, 0.4)',
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: 'rgba(79, 70, 229, 1)',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: { color: '#9ca3af', font: { size: 14, family: 'sans-serif' } },
+                            ticks: { display: false, min: 0, max: 100 } // 隐藏刻度数字，锁定 0-100
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
