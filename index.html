@@ -264,18 +264,18 @@
         const escapeHTML = (str) => String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 
         const metricsDict = {
-            'global_score': { title: '综合霸权总分 (Global Verdict)', source: '多维数据综合加权模型', desc: '该角色的终极商业潜能评级。S-Tier 代表拥有极强且全面的变现能力；B-Tier 通常指在特定小圈子内活跃，商业化需谨慎。' },
-            '社区底盘': { title: '社区底盘 (Community)', source: 'MyAnimeList, AniList 等核心数据库', desc: '反映角色在硬核二次元受众中的“死忠粉”规模。分数越高，说明受众越稳固，是 IP 长尾变现的基石。' },
-            '视觉同人': { title: '视觉同人产出 (Visual Art)', source: 'Danbooru, DeviantArt 聚合', desc: '反映全球画师对该角色的创作热情。分数越高，说明角色外观设计极其成功。这是制作手办、立牌等实体周边最核心的先行指标。' },
-            '视频破圈': { title: '视频破圈传播 (Video Virality)', source: 'TikTok, YouTube 聚合', desc: '反映角色跨出核心圈层、吸引大众用户的能力。分数越高，越适合开展游戏联动和买量宣发。' },
-            '剧情厚度': { title: '剧情厚度 (Lore Depth)', source: 'Fandom Wiki 等硬核维基', desc: '反映角色人设丰满程度。分数越高，说明角色极具话题度，适合深度的剧情向衍生开发。' },
-            '即时热度': { title: '即时热度 (Search Trend)', source: 'Google Trends 全网趋势', desc: '反映角色近期的全网热度风向标。处于高位说明是品牌蹭热度进行营销宣发的最佳时机。' },
-            'tiktok': { title: 'TikTok 短视频爆款指数', source: '双轨制变现计算模型', desc: '判定角色是否具备短视频病毒传播潜质。高分角色是带货和切片投流的最佳选择。' },
-            'merch': { title: '周边开发指数 (Merchandise)', source: '视觉基数 × 变体数量 × 色气度加权', desc: '预判角色实体商品的转化率。系统深度考量了角色的服装变体数量，高分代表极高溢价能力。' },
-            'social': { title: 'CP 二创裂变指数 (Social)', source: '剧情厚度 × 粉丝互动活跃度', desc: '衡量角色引发粉丝自发产出“同人羁绊关系（CP）”的能力。极其适合出双人立牌等强捆绑周边。' },
-            'ai_archetype': { title: '核心人设原型 (Archetype)', source: 'Claude KIE 引擎推演', desc: '用于指导品牌联动时的“人设匹配度”。' },
-            'ai_gapmoe': { title: '反差萌卖点 (Gap Moe)', source: 'Claude KIE 引擎推演', desc: '反差萌是击穿受众心理防线的最强武器，直接指导文案组撰写营销通稿和二创脚本。' },
-            'ai_emotion': { title: '受众情绪价值 (Resonance)', source: 'Claude KIE 引擎推演', desc: '剖析粉丝为什么愿意为 ta 掏钱。明确情绪价值，才能精准把控周边的设计基调。' }
+            'global_score': { title: '综合霸权总分', source: '多维数据综合加权模型', desc: '该角色的终极商业潜能评级。' },
+            '社区底盘': { title: '社区底盘', source: '核心数据库', desc: '反映死忠粉规模。' },
+            '视觉同人': { title: '视觉同人产出', source: '图库聚合', desc: '反映外观设计成功度。' },
+            '视频破圈': { title: '视频破圈传播', source: '短视频聚合', desc: '反映大众破圈能力。' },
+            '剧情厚度': { title: '剧情厚度', source: '维基百科', desc: '反映人设丰满程度。' },
+            '即时热度': { title: '即时热度', source: '全网趋势', desc: '反映近期热度风向标。' },
+            'tiktok': { title: 'TikTok 爆款指数', source: '变现模型', desc: '短视频带货强指标。' },
+            'merch': { title: '周边开发指数', source: '变现模型', desc: '实体商品转化率指标。' },
+            'social': { title: 'CP 二创裂变指数', source: '变现模型', desc: '羁绊周边变现潜力。' },
+            'ai_archetype': { title: '核心人设原型', source: '大模型推演', desc: '指导联名匹配度。' },
+            'ai_gapmoe': { title: '反差萌卖点', source: '大模型推演', desc: '击穿受众心理防线。' },
+            'ai_emotion': { title: '受众情绪价值', source: '大模型推演', desc: '挖掘粉丝氪金动力。' }
         };
 
         function openModal(key, customTitle = null, customSource = null, customDesc = null) {
@@ -294,6 +294,26 @@
         }
 
         function closeModal() { document.getElementById('infoModal').classList.add('hidden'); }
+
+        // ==========================================
+        // 🔥 救回你的缓存记忆功能！
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedDataStr = localStorage.getItem('lastIPData');
+            const savedName = localStorage.getItem('lastIPName');
+            if (savedDataStr && savedName) {
+                try {
+                    const savedData = JSON.parse(savedDataStr);
+                    document.getElementById('searchInput').value = savedName;
+                    document.getElementById('resultsContainer').classList.remove('hidden');
+                    setTimeout(() => {
+                        renderData(savedData);
+                        if (radarChartInstance) radarChartInstance.resize();
+                        if (trendChartInstance) trendChartInstance.resize();
+                    }, 50);
+                } catch (e) { console.error("缓存恢复失败", e); }
+            }
+        });
 
         async function startSearch() {
             const inputVal = document.getElementById('searchInput').value.trim();
@@ -318,10 +338,9 @@
                     if (currentProgress > 95) currentProgress = 95;
                     progressBar.style.width = currentProgress + '%';
                     progressText.innerText = Math.floor(currentProgress) + '%';
-                    if (currentProgress > 20 && currentProgress < 40) loadingStatusText.innerText = '正在抓取 YouTube 与 TikTok 视频源...';
-                    if (currentProgress >= 40 && currentProgress < 60) loadingStatusText.innerText = '正在调取 Danbooru 同人视觉数据库...';
-                    if (currentProgress >= 60 && currentProgress < 80) loadingStatusText.innerText = '正在请求 Claude KIE 引擎进行商业诊断...';
-                    if (currentProgress >= 80) loadingStatusText.innerText = '大模型深度推演中，即将生成报告...';
+                    if (currentProgress > 20 && currentProgress < 40) loadingStatusText.innerText = '正在抓取视频源...';
+                    if (currentProgress >= 40 && currentProgress < 60) loadingStatusText.innerText = '正在调取视觉图库...';
+                    if (currentProgress >= 60 && currentProgress < 80) loadingStatusText.innerText = '正在请求大模型诊断...';
                 }
             }, 1200);
 
@@ -332,11 +351,13 @@
                     body: JSON.stringify({ character: inputVal })
                 });
 
-                if (!response.ok) throw new Error("网络响应失败，请检查 n8n 接口状态");
+                if (!response.ok) throw new Error("网络响应失败");
                 const responseData = await response.json();
-                
-                // 🔥 终极兼容：不管是包在数组里，还是直出的 JSON，统统通吃
                 let rawData = Array.isArray(responseData) ? responseData[0].json : (responseData.json || responseData);
+                
+                // 🔥 写回本地缓存，记忆功能复活！
+                localStorage.setItem('lastIPData', JSON.stringify(rawData));
+                localStorage.setItem('lastIPName', inputVal);
                 
                 clearInterval(progressInterval);
                 progressBar.style.width = '100%'; progressText.innerText = '100%';
@@ -361,218 +382,121 @@
         }
 
         // ==========================================
-        // 🔥 核心解析逻辑：全地形探测引擎 (完美兼容飞书格式与原生数组)
+        // 🔥 绝对防御：全地形数据抽取引擎！
         // ==========================================
         function renderData(rawData) {
-            let fields = {};
-            
-            if (rawData && rawData.data && rawData.data.record && rawData.data.record.fields) {
-                fields = rawData.data.record.fields;
-            } else if (rawData && rawData.fields) {
-                fields = rawData.fields;
-            } else if (rawData && rawData["1_Global_Verdict"]) {
-                fields = {
-                    "角色名": rawData["1_Global_Verdict"].character_name,
-                    "IP类别": rawData["1_Global_Verdict"].character_category,
-                    "霸权总分": rawData["1_Global_Verdict"].final_weighted_score,
-                    "市场评级": rawData["1_Global_Verdict"].market_tier,
-                    "主视觉图": rawData["5_Media_And_Assets"]?.main_avatar_url,
-                    "短视频带货力": rawData["3_Commercial_Viability_Indexes"]?.tiktok_virality_index,
-                    "周边开发潜力": rawData["3_Commercial_Viability_Indexes"]?.merchandise_value_index,
-                    "同人展会热度": rawData["3_Commercial_Viability_Indexes"]?.social_shipping_index,
-                    "欧美社区底盘": rawData["2_Five_Dimensional_Radar"]?.community_score,
-                    "视觉同人发帖": rawData["2_Five_Dimensional_Radar"]?.visual_art_score,
-                    "视频破圈互动": rawData["2_Five_Dimensional_Radar"]?.video_virality_score,
-                    "剧情设定厚度": rawData["2_Five_Dimensional_Radar"]?.lore_depth_score,
-                    "全球搜索趋势": rawData["2_Five_Dimensional_Radar"]?.search_trend_score,
-                    "核心人设原型": rawData["4_Baseline_Attribute_Mining"]?.G_AI_Deep_Analysis?.core_archetype,
-                    "反差萌卖点": rawData["4_Baseline_Attribute_Mining"]?.G_AI_Deep_Analysis?.gap_moe_selling_point,
-                    "受众情绪价值": rawData["4_Baseline_Attribute_Mining"]?.G_AI_Deep_Analysis?.emotional_resonance,
-                    "1年期热度走势": (rawData["6_Popularity_Trend"] || []).join(","),
-                    // 🔥 保留原生数组，不再强转字符串
-                    "高频变现视觉符号": rawData["4_Baseline_Attribute_Mining"]?.G_AI_Deep_Analysis?.merchandise_visual_anchors,
-                    "高潜二创方向": rawData["4_Baseline_Attribute_Mining"]?.G_AI_Deep_Analysis?.derivative_content_direction,
-                    "AI 全球热梗科普": rawData["4_Baseline_Attribute_Mining"]?.F_AI_Viral_Memes
-                };
-            }
+            let feishuFields = {};
+            if (rawData?.data?.record?.fields) feishuFields = rawData.data.record.fields;
+            else if (rawData?.fields) feishuFields = rawData.fields;
 
-            document.getElementById('charName').innerText = fields["角色名"] || 'Unknown';
-            document.getElementById('charCategory').innerText = fields["IP类别"] || 'N/A';
-            document.getElementById('charScore').innerText = fields["霸权总分"] || 0;
-            document.getElementById('charTier').innerText = fields["市场评级"] || 'N/A';
+            // 提取 n8n 原始结构
+            const n8nVerdict = rawData["1_Global_Verdict"] || {};
+            const n8nRadar = rawData["2_Five_Dimensional_Radar"] || {};
+            const n8nComm = rawData["3_Commercial_Viability_Indexes"] || {};
+            const n8nAttrs = rawData["4_Baseline_Attribute_Mining"] || {};
+            const n8nDeepAI = n8nAttrs.G_AI_Deep_Analysis || {};
+            const n8nMedia = rawData["5_Media_And_Assets"] || {};
 
-            let avatarObj = fields["主视觉图"];
+            // 🔥 自动寻路器：先去飞书格式里找，找不到再去 n8n 格式找
+            const getVal = (keys, fallback) => {
+                for (let k of keys) {
+                    if (feishuFields[k] !== undefined && feishuFields[k] !== null && feishuFields[k] !== "") return feishuFields[k];
+                }
+                return fallback;
+            };
+
+            document.getElementById('charName').innerText = getVal(["角色名"], n8nVerdict.character_name) || 'Unknown';
+            document.getElementById('charCategory').innerText = getVal(["IP类别"], n8nVerdict.character_category) || 'N/A';
+            document.getElementById('charScore').innerText = getVal(["霸权总分"], n8nVerdict.final_weighted_score) || 0;
+            document.getElementById('charTier').innerText = getVal(["市场评级"], n8nVerdict.market_tier) || 'N/A';
+
+            let avatarObj = getVal(["主视觉图"], n8nMedia.main_avatar_url);
             let avatarUrl = (typeof avatarObj === 'object' && avatarObj !== null) ? (avatarObj.link || avatarObj.url) : avatarObj;
-            if (!avatarUrl || !avatarUrl.startsWith('http')) avatarUrl = 'https://via.placeholder.com/150/1f2937/8b949e?text=No+Image';
+            if (!avatarUrl || !String(avatarUrl).startsWith('http')) avatarUrl = 'https://via.placeholder.com/150/1f2937/8b949e?text=No+Image';
             document.getElementById('charAvatar').src = avatarUrl;
 
-            document.getElementById('idxTiktok').innerText = fields["短视频带货力"] || 0;
-            document.getElementById('idxMerch').innerText = fields["周边开发潜力"] || 0;
-            document.getElementById('idxSocial').innerText = fields["同人展会热度"] || 0;
+            document.getElementById('idxTiktok').innerText = getVal(["短视频带货力"], n8nComm.tiktok_virality_index) || 0;
+            document.getElementById('idxMerch').innerText = getVal(["周边开发潜力"], n8nComm.merchandise_value_index) || 0;
+            document.getElementById('idxSocial').innerText = getVal(["同人展会热度"], n8nComm.social_shipping_index) || 0;
 
-            document.getElementById('aiArchetype').innerText = fields["核心人设原型"] || "暂无数据";
-            document.getElementById('aiGapMoe').innerText = fields["反差萌卖点"] || "暂无数据";
-            document.getElementById('aiEmotion').innerText = fields["受众情绪价值"] || "暂无数据";
+            document.getElementById('aiArchetype').innerText = getVal(["核心人设原型"], n8nDeepAI.core_archetype) || "暂无数据";
+            document.getElementById('aiGapMoe').innerText = getVal(["反差萌卖点"], n8nDeepAI.gap_moe_selling_point) || "暂无数据";
+            document.getElementById('aiEmotion').innerText = getVal(["受众情绪价值"], n8nDeepAI.emotional_resonance) || "暂无数据";
 
-            // 🔥 修复：智能识别数组或字符串
+            // 🔥 不管数据是藏在深处，还是变成了字符串，通通扒出来！
+            const merchVisuals = getVal(["高频变现视觉符号", "变现视觉符号"], n8nDeepAI.merchandise_visual_anchors);
+            const derivatives = getVal(["高潜二创方向"], n8nDeepAI.derivative_content_direction);
+            const memesData = getVal(["AI 全球热梗科普"], n8nAttrs.F_AI_Viral_Memes);
+
             const parseToArray = (data) => {
                 if (Array.isArray(data)) return data;
-                if (typeof data === 'string' && data !== "暂无数据" && data !== "暂无") return data.split(' | ');
+                if (typeof data === 'string' && data !== "暂无数据" && data !== "暂无") {
+                    return data.split(/ \| |\|/).map(s => s.trim()).filter(Boolean);
+                }
                 return [];
             };
-            
+
             const renderAITags = (domId, arr, typeName) => {
                 document.getElementById(domId).innerHTML = (arr && arr.length > 0) 
-                    ? arr.map(tag => `<span class="ai-tag-pill" onclick="openModal('custom', '${escapeHTML(tag)}', 'AI KIE 提取', '代表了强烈的垂直属性。')">${escapeHTML(tag)}</span>`).join('') 
+                    ? arr.map(tag => `<span class="ai-tag-pill" onclick="openModal('custom', '${escapeHTML(tag)}', 'AI 提取', '深度商业标签')">${escapeHTML(tag)}</span>`).join('') 
                     : '<span class="text-gray-500 text-sm">暂无标签</span>';
             };
-            
-            renderAITags('aiVisuals', parseToArray(fields["高频变现视觉符号"]), '周边实物打样');
-            renderAITags('aiDerivatives', parseToArray(fields["高潜二创方向"]), '短视频切片');
 
-            // 🔥 修复：热梗数据原生数组解析支持
-            let memesRaw = fields["AI 全球热梗科普"];
+            renderAITags('aiVisuals', parseToArray(merchVisuals), '周边打样');
+            renderAITags('aiDerivatives', parseToArray(derivatives), '视频切片');
+
             let memesHtml = '';
-            
-            if (Array.isArray(memesRaw) && memesRaw.length > 0 && memesRaw[0].en_term) {
-                // 处理原生 JSON 对象数组
-                memesHtml = memesRaw.map(m => `
-                    <div onclick="openModal('custom', '${escapeHTML(m.en_term)}', '数据源: AI 解析', '${escapeHTML(m.explanation)}')" 
-                         class="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30 hover:border-purple-400 hover:bg-purple-900/30 cursor-pointer transition-all hover:-translate-y-1 shadow-lg">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-xl">🔥</span><h5 class="text-white font-bold text-base line-clamp-1">${escapeHTML(m.en_term)}</h5>
-                        </div>
+            if (Array.isArray(memesData) && memesData.length > 0 && memesData[0].en_term) {
+                memesHtml = memesData.map(m => `
+                    <div onclick="openModal('custom', '${escapeHTML(m.en_term)}', 'AI 解析', '${escapeHTML(m.explanation)}')" 
+                         class="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30 hover:border-purple-400 cursor-pointer shadow-lg transition-all hover:-translate-y-1">
+                        <div class="flex items-center gap-2 mb-2"><span class="text-xl">🔥</span><h5 class="text-white font-bold text-base line-clamp-1">${escapeHTML(m.en_term)}</h5></div>
                         <p class="text-gray-400 text-sm leading-relaxed line-clamp-2">${escapeHTML(m.explanation)}</p>
-                    </div>
-                `).join('');
-            } else if (typeof memesRaw === 'string' && memesRaw.includes('🔥')) {
-                // 处理飞书拼接的字符串格式
-                const memeBlocks = memesRaw.split('🔥').filter(text => text.trim() !== '');
-                memesHtml = memeBlocks.map(block => {
+                    </div>`).join('');
+            } else if (typeof memesData === 'string' && memesData.includes('🔥')) {
+                memesHtml = memesData.split('🔥').filter(t => t.trim() !== '').map(block => {
                     const parts = block.split('💡');
                     const title = parts[0] ? parts[0].trim() : "未知热梗";
                     let explanation = parts[1] ? parts[1].replace(/^解析[:：]\s*/, '').trim() : "暂无解析";
                     return `
-                        <div onclick="openModal('custom', '${escapeHTML(title)}', '文本提取', '${escapeHTML(explanation)}')" 
-                             class="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30 hover:border-purple-400 hover:bg-purple-900/30 cursor-pointer transition-all hover:-translate-y-1 shadow-lg">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-xl">🔥</span><h5 class="text-white font-bold text-base line-clamp-1">${escapeHTML(title)}</h5>
-                            </div>
-                            <p class="text-gray-400 text-sm leading-relaxed line-clamp-2">${escapeHTML(explanation)}</p>
-                        </div>
-                    `;
+                    <div onclick="openModal('custom', '${escapeHTML(title)}', 'AI 解析', '${escapeHTML(explanation)}')" 
+                         class="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30 hover:border-purple-400 cursor-pointer shadow-lg transition-all hover:-translate-y-1">
+                        <div class="flex items-center gap-2 mb-2"><span class="text-xl">🔥</span><h5 class="text-white font-bold text-base line-clamp-1">${escapeHTML(title)}</h5></div>
+                        <p class="text-gray-400 text-sm leading-relaxed line-clamp-2">${escapeHTML(explanation)}</p>
+                    </div>`;
                 }).join('');
             }
             document.getElementById('aiMemesContainer').innerHTML = memesHtml || '<p class="text-gray-500 text-sm">暂无热梗数据</p>';
 
             renderRadarChart({
-                community_score: fields["欧美社区底盘"] || 0,
-                visual_art_score: fields["视觉同人发帖"] || 0,
-                video_virality_score: fields["视频破圈互动"] || 0,
-                lore_depth_score: fields["剧情设定厚度"] || 0,
-                search_trend_score: fields["全球搜索趋势"] || 0
+                community_score: getVal(["欧美社区底盘"], n8nRadar.community_score) || 0,
+                visual_art_score: getVal(["视觉同人发帖"], n8nRadar.visual_art_score) || 0,
+                video_virality_score: getVal(["视频破圈互动"], n8nRadar.video_virality_score) || 0,
+                lore_depth_score: getVal(["剧情设定厚度"], n8nRadar.lore_depth_score) || 0,
+                search_trend_score: getVal(["全球搜索趋势"], n8nRadar.search_trend_score) || 0
             });
-            renderTrendChart(fields["1年期热度走势"] || "");
-        }
-            // --- 开始无脑渲染 ---
-            document.getElementById('charName').innerText = fields["角色名"] || 'Unknown';
-            document.getElementById('charCategory').innerText = fields["IP类别"] || 'N/A';
-            document.getElementById('charScore').innerText = fields["霸权总分"] || 0;
-            document.getElementById('charTier').innerText = fields["市场评级"] || 'N/A';
-
-            // 暴力扒出图片链接
-            let avatarObj = fields["主视觉图"];
-            let avatarUrl = (typeof avatarObj === 'object' && avatarObj !== null) ? (avatarObj.link || avatarObj.url) : avatarObj;
-            
-            // 兜底逻辑：如果图片为空或者是占位图，不会报错，直接优雅显示
-            if (!avatarUrl || !avatarUrl.startsWith('http')) {
-                avatarUrl = 'https://via.placeholder.com/150/1f2937/8b949e?text=No+Image';
-            }
-            document.getElementById('charAvatar').src = avatarUrl;
-
-            document.getElementById('idxTiktok').innerText = fields["短视频带货力"] || 0;
-            document.getElementById('idxMerch').innerText = fields["周边开发潜力"] || 0;
-            document.getElementById('idxSocial').innerText = fields["同人展会热度"] || 0;
-
-            document.getElementById('aiArchetype').innerText = fields["核心人设原型"] || "暂无数据";
-            document.getElementById('aiGapMoe').innerText = fields["反差萌卖点"] || "暂无数据";
-            document.getElementById('aiEmotion').innerText = fields["受众情绪价值"] || "暂无数据";
-
-            const parseStrToArray = (str) => (str && str !== "暂无数据" && str !== "暂无") ? String(str).split(' | ') : [];
-            
-            const renderAITags = (domId, arr, typeName) => {
-                document.getElementById(domId).innerHTML = (arr && arr.length > 0) 
-                    ? arr.map(tag => `<span class="ai-tag-pill" onclick="openModal('custom', '${escapeHTML(tag)}', 'AI KIE 提取', '代表了强烈的垂直属性。')">${escapeHTML(tag)}</span>`).join('') 
-                    : '<span class="text-gray-500 text-sm">暂无标签</span>';
-            };
-            
-            renderAITags('aiVisuals', parseStrToArray(fields["高频变现视觉符号"]), '周边实物打样');
-            renderAITags('aiDerivatives', parseStrToArray(fields["高潜二创方向"]), '短视频切片');
-
-            // 渲染热梗
-            let memesRaw = fields["AI 全球热梗科普"] || "";
-            let memesHtml = '';
-            if (typeof memesRaw === 'string' && memesRaw.includes('🔥')) {
-                const memeBlocks = memesRaw.split('🔥').filter(text => text.trim() !== '');
-                memesHtml = memeBlocks.map(block => {
-                    const parts = block.split('💡');
-                    const title = parts[0] ? parts[0].trim() : "未知热梗";
-                    let explanation = parts[1] ? parts[1].replace(/^解析[:：]\s*/, '').trim() : "暂无解析";
-                    return `
-                        <div onclick="openModal('custom', '${escapeHTML(title)}', '文本提取', '${escapeHTML(explanation)}')" 
-                             class="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30 hover:border-purple-400 hover:bg-purple-900/30 cursor-pointer transition-all hover:-translate-y-1 shadow-lg">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-xl">🔥</span><h5 class="text-white font-bold text-base line-clamp-1">${escapeHTML(title)}</h5>
-                            </div>
-                            <p class="text-gray-400 text-sm leading-relaxed line-clamp-2">${escapeHTML(explanation)}</p>
-                        </div>
-                    `;
-                }).join('');
-            }
-            document.getElementById('aiMemesContainer').innerHTML = memesHtml || '<p class="text-gray-500 text-sm">暂无热梗数据</p>';
-
-            // 渲染雷达图与趋势图
-            renderRadarChart({
-                community_score: fields["欧美社区底盘"] || 0,
-                visual_art_score: fields["视觉同人发帖"] || 0,
-                video_virality_score: fields["视频破圈互动"] || 0,
-                lore_depth_score: fields["剧情设定厚度"] || 0,
-                search_trend_score: fields["全球搜索趋势"] || 0
-            });
-            renderTrendChart(fields["1年期热度走势"] || "");
+            renderTrendChart(getVal(["1年期热度走势"], rawData["6_Popularity_Trend"]) || "");
         }
 
         function renderRadarChart(radarData) {
             const dom = document.getElementById('radarChart');
             if (radarChartInstance) radarChartInstance.dispose();
             radarChartInstance = echarts.init(dom);
-            
             const option = {
                 tooltip: { confine: true, backgroundColor: 'rgba(15, 17, 26, 0.95)', borderColor: '#4f46e5', textStyle: { color: '#fff' } },
                 radar: {
                     radius: '70%', center: ['50%', '55%'],
-                    indicator: [
-                        { name: '社区底盘', max: 100 }, { name: '视觉同人', max: 100 },
-                        { name: '视频破圈', max: 100 }, { name: '剧情厚度', max: 100 }, { name: '即时热度', max: 100 }
-                    ],
-                    shape: 'polygon', splitNumber: 4,
-                    axisName: { color: '#a0aec0', fontSize: 13, fontWeight: 'bold' },
-                    triggerEvent: true, 
+                    indicator: [ { name: '社区底盘', max: 100 }, { name: '视觉同人', max: 100 }, { name: '视频破圈', max: 100 }, { name: '剧情厚度', max: 100 }, { name: '即时热度', max: 100 } ],
+                    shape: 'polygon', splitNumber: 4, axisName: { color: '#a0aec0', fontSize: 13, fontWeight: 'bold' },
                     splitLine: { lineStyle: { color: ['rgba(99, 102, 241, 0.1)', 'rgba(99, 102, 241, 0.2)', 'rgba(99, 102, 241, 0.4)', 'rgba(99, 102, 241, 0.6)'] } },
-                    splitArea: { show: false },
-                    axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }
+                    splitArea: { show: false }, axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }
                 },
                 series: [{
                     type: 'radar',
                     data: [{
-                        value: [
-                            radarData.community_score, radarData.visual_art_score, 
-                            radarData.video_virality_score, radarData.lore_depth_score, radarData.search_trend_score
-                        ],
-                        name: '得分', symbol: 'circle', symbolSize: 8,
-                        itemStyle: { color: '#00f2fe', borderColor: '#fff', borderWidth: 2 },
-                        areaStyle: { color: 'rgba(99, 102, 241, 0.3)' },
-                        lineStyle: { color: '#00f2fe', width: 3, shadowColor: 'rgba(0, 242, 254, 0.8)', shadowBlur: 10 },
+                        value: [ radarData.community_score, radarData.visual_art_score, radarData.video_virality_score, radarData.lore_depth_score, radarData.search_trend_score ],
+                        name: '得分', symbol: 'circle', symbolSize: 8, itemStyle: { color: '#00f2fe', borderColor: '#fff', borderWidth: 2 },
+                        areaStyle: { color: 'rgba(99, 102, 241, 0.3)' }, lineStyle: { color: '#00f2fe', width: 3, shadowColor: 'rgba(0, 242, 254, 0.8)', shadowBlur: 10 },
                         label: { show: true, formatter: function (params) { return params.value; }, color: '#fff', fontSize: 14, fontWeight: 'bold' }
                     }]
                 }]
@@ -584,47 +508,30 @@
             const dom = document.getElementById('trendChart');
             if (trendChartInstance) trendChartInstance.dispose();
             trendChartInstance = echarts.init(dom);
-
             let processedArray = [];
             if (typeof trendData === 'string' && trendData.includes(',')) {
                 const values = trendData.split(',').map(Number);
-                processedArray = values.map((val, idx) => {
-                    const diff = values.length - 1 - idx;
-                    return { date: diff === 0 ? '本周' : diff + '周前', score: val };
-                });
+                processedArray = values.map((val, idx) => ({ date: (values.length - 1 - idx) === 0 ? '本周' : (values.length - 1 - idx) + '周前', score: val }));
+            } else if (Array.isArray(trendData) && trendData.length > 0) {
+                processedArray = trendData.map((val, idx) => ({ date: (trendData.length - 1 - idx) === 0 ? '本周' : (trendData.length - 1 - idx) + '周前', score: Number(val) }));
             }
-
-            if (processedArray.length === 0) {
-                for (let i = 52; i >= 0; i--) processedArray.push({ date: i === 0 ? '本周' : (i + '周前'), score: 0 });
-            }
-
-            const xData = processedArray.map(item => item.date);
-            const yData = processedArray.map(item => item.score);
+            if (processedArray.length === 0) for (let i = 52; i >= 0; i--) processedArray.push({ date: i === 0 ? '本周' : (i + '周前'), score: 0 });
 
             const option = {
                 tooltip: { trigger: 'axis', backgroundColor: 'rgba(15, 17, 26, 0.95)', borderColor: '#00f2fe', textStyle: { color: '#fff' } },
                 grid: { left: '3%', right: '3%', bottom: '5%', top: '8%', containLabel: true },
-                xAxis: {
-                    type: 'category', boundaryGap: false, data: xData,
-                    axisLine: { lineStyle: { color: '#2d3142' } },
-                    axisLabel: { color: '#6b7280', interval: Math.floor(xData.length / 10), margin: 15 }
-                },
+                xAxis: { type: 'category', boundaryGap: false, data: processedArray.map(i => i.date), axisLine: { lineStyle: { color: '#2d3142' } }, axisLabel: { color: '#6b7280', interval: Math.floor(processedArray.length / 10), margin: 15 } },
                 yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)' } }, axisLabel: { color: '#6b7280' } },
                 dataZoom: [{ type: 'inside', start: 0, end: 100 }],
                 series: [{
-                    name: '热度趋势', type: 'line', smooth: true, showSymbol: false, 
-                    data: yData, itemStyle: { color: '#00f2fe' },
-                    lineStyle: { color: '#00f2fe', width: 2, shadowColor: 'rgba(0, 242, 254, 0.4)', shadowBlur: 5 },
+                    name: '热度趋势', type: 'line', smooth: true, showSymbol: false, data: processedArray.map(i => i.score),
+                    itemStyle: { color: '#00f2fe' }, lineStyle: { color: '#00f2fe', width: 2, shadowColor: 'rgba(0, 242, 254, 0.4)', shadowBlur: 5 },
                     areaStyle: { color: 'rgba(0, 242, 254, 0.2)' }
                 }]
             };
             trendChartInstance.setOption(option);
         }
-
-        window.addEventListener('resize', () => {
-            if(radarChartInstance) radarChartInstance.resize();
-            if(trendChartInstance) trendChartInstance.resize();
-        });
+        window.addEventListener('resize', () => { if(radarChartInstance) radarChartInstance.resize(); if(trendChartInstance) trendChartInstance.resize(); });
     </script>
 </body>
 </html>
