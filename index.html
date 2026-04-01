@@ -193,15 +193,12 @@
     </div>
 
     <script>
-        // ！！！将这里的 URL 替换为你 n8n Webhook 的 Production URL 或 Test URL ！！！
+        // 【已嵌入】你真实的 n8n 接口地址
         const WEBHOOK_URL = "https://zcaaron7.app.n8n.cloud/webhook/start_research"; 
         
         let radarChartInstance = null;
         let trendChartInstance = null;
 
-        // ==========================================
-        // 指标字典：所有的商业解读文案都在这里
-        // ==========================================
         const metricsDict = {
             '社区底盘': {
                 title: '社区核心底盘 (Community)',
@@ -245,23 +242,44 @@
             }
         };
 
-        // 打开弹窗的函数
         function openModal(metricKey) {
             const data = metricsDict[metricKey];
             if (!data) return;
-            
             document.getElementById('modalTitle').innerText = data.title;
             document.getElementById('modalSource').innerText = `数据源: ${data.source}`;
             document.getElementById('modalDesc').innerHTML = data.desc;
-            
-            const modal = document.getElementById('infoModal');
-            modal.classList.remove('hidden');
+            document.getElementById('infoModal').classList.remove('hidden');
         }
 
-        // 关闭弹窗的函数
         function closeModal() {
             document.getElementById('infoModal').classList.add('hidden');
         }
+
+        // ==========================================
+        // 初始化功能：网页加载时检查是否有历史数据
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedDataStr = localStorage.getItem('lastIPData');
+            const savedName = localStorage.getItem('lastIPName');
+            
+            // 如果本地存有数据，直接秒级恢复上一场的面板
+            if (savedDataStr && savedName) {
+                try {
+                    const savedData = JSON.parse(savedDataStr);
+                    document.getElementById('searchInput').value = savedName;
+                    
+                    document.getElementById('resultsContainer').classList.remove('hidden');
+                    // 同样使用延时保证 Echarts 宽度计算准确
+                    setTimeout(() => {
+                        renderData(savedData);
+                        if (radarChartInstance) radarChartInstance.resize();
+                        if (trendChartInstance) trendChartInstance.resize();
+                    }, 50);
+                } catch (e) {
+                    console.error("恢复历史记录失败", e);
+                }
+            }
+        });
 
         async function startSearch() {
             const inputVal = document.getElementById('searchInput').value.trim();
@@ -282,6 +300,10 @@
                 const responseData = await response.json();
                 const data = Array.isArray(responseData) ? responseData[0].json : (responseData.json || responseData);
                 
+                // 【核心新增】：成功获取后，将其存入浏览器本地 localStorage
+                localStorage.setItem('lastIPData', JSON.stringify(data));
+                localStorage.setItem('lastIPName', inputVal);
+
                 document.getElementById('loadingState').classList.add('hidden');
                 document.getElementById('loadingState').classList.remove('flex');
                 document.getElementById('resultsContainer').classList.remove('hidden');
@@ -351,7 +373,6 @@
                     ],
                     shape: 'polygon',
                     splitNumber: 4,
-                    // 【核心改动】：让雷达图的外围文字可以被点击 (triggerEvent)
                     axisName: { color: '#a0aec0', fontSize: 13, fontWeight: 'bold' },
                     triggerEvent: true, 
                     splitLine: { lineStyle: { color: ['rgba(99, 102, 241, 0.1)', 'rgba(99, 102, 241, 0.2)', 'rgba(99, 102, 241, 0.4)', 'rgba(99, 102, 241, 0.6)'] } },
@@ -388,9 +409,7 @@
             };
             radarChartInstance.setOption(option);
 
-            // 【监听雷达图点击事件】
             radarChartInstance.on('click', function (params) {
-                // 如果用户点击的是雷达图周边的文字 (如"社区底盘")
                 if (params.componentType === 'radar' && params.name) {
                     openModal(params.name);
                 }
