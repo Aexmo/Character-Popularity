@@ -327,36 +327,25 @@
             document.getElementById('infoModal').classList.remove('hidden');
         }
 // ==========================================
-        // 🔥 新增：带极客混淆加密的秒级调取飞书历史档案
+        // 🔥 升级版：带加密锁的可视化历史档案面板
         // ==========================================
-        async function loadHistory() {
-            // 🔒 1. 弹出极其霸气的密码输入框
+        let cachedHistoryRecords = []; // 临时存储拉取到的飞书数据
+
+        async function openHistoryPanel() {
+            // 🔒 1. 密码验证
             const pwd = prompt("🔒 机密商业档案检索系统\n请输入最高权限管理员密码：");
-            
-            // 🛡️ 2. Base64 混淆验证机制 (绝对不暴露明文密码)
-            // 真实密码 "Zcaaron3123119." 的 Base64 密文是 "WmNhYXJvbjMxMjMxMTku"
             if (!pwd || btoa(pwd) !== "WmNhYXJvbjMxMjMxMTku") {
                 alert("❌ 密码错误或已取消！非法入侵警告！");
-                return; // 密码不对，直接掐断，下面代码都不执行
+                return;
             }
 
-            const inputVal = document.getElementById('searchInput').value.trim();
-            if (!inputVal) return alert("✅ 身份验证通过。但请输入要调取的角色名称！");
-
-            document.getElementById('loadingState').classList.remove('hidden');
-            document.getElementById('loadingState').classList.add('flex');
-            document.getElementById('resultsContainer').classList.add('hidden');
-            
-            const progressBar = document.getElementById('progressBar');
-            const progressText = document.getElementById('progressText');
-            const statusText = document.getElementById('loadingStatusText');
-
-            // 不用等60秒，直接显示查询中
-            progressBar.style.width = '60%'; progressText.innerText = '60%';
-            statusText.innerText = '身份核准，正在直连数据库翻阅历史档案...';
+            // 2. 打开弹窗，显示加载状态
+            const historyList = document.getElementById('historyList');
+            document.getElementById('historyModal').classList.remove('hidden');
+            historyList.innerHTML = '<div class="flex flex-col items-center justify-center py-10"><p class="text-cyan-400 text-lg font-bold animate-pulse mb-2">正在连线飞书中央数据库...</p><p class="text-gray-500 text-sm">正在解密历史档案，请稍候</p></div>';
 
             try {
-                // 直接呼叫你的读取 Webhook
+                // 3. 直连飞书拉取数据
                 const checkUrl = `${WEBHOOK_CHECK}?page_size=500`;
                 const res = await fetch(checkUrl);
                 if (!res.ok) throw new Error("网络请求失败"); 
@@ -368,47 +357,95 @@
                 else if (responseData.items) records = responseData.items;
 
                 if (!records || records.length === 0) {
-                    alert("飞书数据库目前为空！");
-                    document.getElementById('loadingState').classList.add('hidden');
-                    document.getElementById('loadingState').classList.remove('flex');
+                    historyList.innerHTML = '<p class="text-gray-500 text-center py-10 font-bold">📭 数据库目前为空，请先进行深度挖掘。</p>';
                     return;
                 }
 
-                // 在这 500 条里光速找人
-                let matchedRecord = [...records].reverse().find(r => {
+                // 4. 数据处理：倒序排列（最新搜的在最上面），并且去重（同一个角色只留最新的一次搜索）
+                records = [...records].reverse();
+                let uniqueRecords = [];
+                let seenNames = new Set();
+                
+                for (let r of records) {
                     let fields = r.fields || r;
-                    let nameInFeishu = fields["角色名"];
-                    if (Array.isArray(nameInFeishu)) nameInFeishu = nameInFeishu[0]?.text || nameInFeishu[0];
-                    let dbName = String(nameInFeishu).toLowerCase().trim();
-                    let searchName = inputVal.toLowerCase().trim();
-                    return searchName.includes(dbName) || dbName.includes(searchName);
-                });
-
-                if (matchedRecord) {
-                    progressBar.style.width = '100%'; progressText.innerText = '100%';
-                    statusText.innerText = '档案调取成功！正在为您渲染...';
+                    let name = fields["角色名"];
+                    if (Array.isArray(name)) name = name[0]?.text || name[0];
+                    if (!name) continue;
                     
-                    // 顺手存个本地记忆，下次刷新还在
-                    localStorage.setItem('lastIPData', JSON.stringify(matchedRecord));
-                    localStorage.setItem('lastIPName', inputVal);
-
-                    setTimeout(() => {
-                        document.getElementById('loadingState').classList.add('hidden');
-                        document.getElementById('loadingState').classList.remove('flex');
-                        document.getElementById('resultsContainer').classList.remove('hidden');
-                        renderData(matchedRecord);
-                    }, 500);
-                } else {
-                    alert(`飞书数据库中未找到与 "${inputVal}" 相关的历史记录。\n如果需要，请点击【🚀 深度挖掘】重新拉取数据。`);
-                    document.getElementById('loadingState').classList.add('hidden');
-                    document.getElementById('loadingState').classList.remove('flex');
+                    let lowerName = String(name).toLowerCase().trim();
+                    if (!seenNames.has(lowerName)) {
+                        seenNames.add(lowerName);
+                        uniqueRecords.push(r);
+                    }
                 }
+
+                cachedHistoryRecords = uniqueRecords; // 存入全局变量供点击调用
+
+                // 5. 渲染精美的列表 UI
+                historyList.innerHTML = uniqueRecords.map((r, index) => {
+                    let fields = r.fields || r;
+                    let name = fields["角色名"];
+                    if (Array.isArray(name)) name = name[0]?.text || name[0];
+                    let score = fields["霸权总分"] || 0;
+                    let tier = fields["市场评级"] || 'N/A';
+                    
+                    // 根据评级换颜色
+                    let tierColor = tier.includes('S') ? 'text-green-400' : (tier.includes('A') ? 'text-blue-400' : 'text-yellow-500');
+
+                    return `
+                    <div onclick="renderSpecificHistory(${index})" class="group flex items-center justify-between bg-gray-900/50 p-4 rounded-xl border border-gray-700 hover:border-cyan-500 hover:bg-gray-800 cursor-pointer transition-all shadow-sm">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-xl border border-gray-600 group-hover:border-cyan-400 transition-colors">📁</div>
+                            <div>
+                                <h4 class="text-white font-bold text-lg tracking-wide">${escapeHTML(name)}</h4>
+                                <p class="text-xs text-gray-400 mt-1">市场评级: <span class="${tierColor} font-bold">${tier}</span> <span class="mx-1">|</span> 霸权总分: <span class="text-white font-bold">${score}</span></p>
+                            </div>
+                        </div>
+                        <button class="bg-indigo-600/20 text-indigo-300 px-4 py-2 rounded-lg border border-indigo-500/30 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-500 transition-all text-sm font-bold flex items-center gap-2">
+                            <span>调取</span> <span class="text-lg">→</span>
+                        </button>
+                    </div>
+                    `;
+                }).join('');
+
             } catch (e) {
                 console.error(e);
-                alert("检索失败，请检查网络或 Webhook 设置。");
-                document.getElementById('loadingState').classList.add('hidden');
-                document.getElementById('loadingState').classList.remove('flex');
+                historyList.innerHTML = '<p class="text-red-500 text-center py-10 font-bold">❌ 检索失败，请检查网络或飞书接口状态。</p>';
             }
+        }
+
+        // 🎯 点击列表某一项后，一键上屏渲染
+        function renderSpecificHistory(index) {
+            const record = cachedHistoryRecords[index];
+            if (!record) return;
+
+            // 关闭弹窗
+            closeHistoryModal();
+            
+            // 直接显示数据容器
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
+            
+            // 把搜索框里的字换成这个角色的名字
+            let fields = record.fields || record;
+            let name = fields["角色名"];
+            if (Array.isArray(name)) name = name[0]?.text || name[0];
+            document.getElementById('searchInput').value = name;
+            
+            // 写入本地缓存，刷新网页还在
+            localStorage.setItem('lastIPData', JSON.stringify(record));
+            localStorage.setItem('lastIPName', name);
+
+            // 瞬间渲染大屏
+            renderData(record);
+            
+            // 丝滑滚动到最顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ❌ 关闭弹窗
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.add('hidden');
         }
         async function startSearch() {
             const inputVal = document.getElementById('searchInput').value.trim();
@@ -625,5 +662,17 @@
         }
         window.addEventListener('resize', () => { if(radarChartInstance) radarChartInstance.resize(); if(trendChartInstance) trendChartInstance.resize(); });
     </script>
+    <div id="historyModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-black/80 backdrop-blur-md transition-opacity">
+        <div class="modal-box p-6 max-w-2xl w-full mx-4 relative max-h-[80vh] flex flex-col border border-cyan-500/30 shadow-[0_0_30px_rgba(0,242,254,0.15)]">
+            <button onclick="closeHistoryModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white bg-gray-800/50 hover:bg-gray-700 rounded-full w-8 h-8 flex items-center justify-center transition-colors">✕</button>
+            <h3 class="text-2xl font-black text-white mb-2 flex items-center gap-2">
+                <span class="text-cyan-400">📚</span> 机密商业档案室
+            </h3>
+            <p class="text-gray-400 text-sm mb-4 pb-4 border-b border-gray-700">直连飞书数据库，点击即可一键无损还原大屏渲染（不消耗算力额度）。</p>
+            
+            <div id="historyList" class="overflow-y-auto pr-2 flex flex-col gap-3 custom-scrollbar">
+                </div>
+        </div>
+    </div>
 </body>
 </html>
