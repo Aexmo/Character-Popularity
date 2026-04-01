@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IP 商业潜力雷达系统 - 旗舰异步版</title>
+    <title>IP 商业潜力雷达系统 - 旗舰满血版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <style>
@@ -51,7 +51,7 @@
         <div class="flex flex-col items-center justify-center w-full mt-10 mb-12">
             <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-500 mb-8 drop-shadow-2xl flex items-center gap-4 tracking-wider">
                 ⚡ IP 商业潜力雷达系统
-                <span class="text-sm bg-indigo-600 px-3 py-1 rounded text-white shadow-[0_0_10px_rgba(79,70,229,0.8)] border border-indigo-400">v5.0 异步高精版</span>
+                <span class="text-sm bg-indigo-600 px-3 py-1 rounded text-white shadow-[0_0_10px_rgba(79,70,229,0.8)] border border-indigo-400">v6.0 全量数据版</span>
             </h1>
             
             <div class="relative w-full max-w-3xl group">
@@ -70,7 +70,7 @@
                 <div class="flex items-start gap-3 text-sm text-indigo-200/80 leading-relaxed text-left">
                     <span class="text-cyan-400 text-lg mt-0.5 animate-pulse">💡</span>
                     <p>
-                        <span class="text-white font-bold">智能纠错就绪：</span>海外各平台对同一角色的命名规则五花八门。但无需担心，本系统底层已接入 <strong class="text-cyan-400 font-bold tracking-wide shadow-cyan">「全域智能名字字典 API」</strong>。您只需输入角色的常用名/英文/罗马音，系统将自动为您跨越全球数据库，匹配最大流量异名，以确保抓取的商业数据绝对精准可靠。
+                        <span class="text-white font-bold">智能纠错就绪：</span>海外各平台对同一角色的命名规则五花八门。本系统底层已接入 <strong class="text-cyan-400 font-bold tracking-wide shadow-cyan">「全域智能名字字典 API」</strong>。只需输入常用名，系统将自动匹配最大流量异名，确保抓取的商业数据绝对精准可靠。
                     </p>
                 </div>
             </div>
@@ -97,7 +97,10 @@
                     <img id="charAvatar" src="" alt="Avatar" class="w-full h-full object-cover">
                 </div>
                 <h2 id="charName" class="text-4xl font-black text-white mb-2 tracking-wide">加载中</h2>
-                <span id="charCategory" class="bg-gray-800 px-4 py-1.5 rounded-full text-sm text-gray-300 mb-8 border border-gray-600 shadow-inner">分类</span>
+                <div class="flex gap-2 mb-8">
+                    <span id="charCategory" class="bg-gray-800 px-4 py-1.5 rounded-full text-sm text-gray-300 border border-gray-600 shadow-inner">分类</span>
+                    <span id="charLifecycle" class="bg-indigo-900/50 px-4 py-1.5 rounded-full text-sm text-indigo-300 border border-indigo-500/30">生命周期</span>
+                </div>
                 <div class="w-full bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl p-6 mt-auto border border-gray-700 shadow-2xl">
                     <p class="text-sm text-gray-400 mb-2 font-bold tracking-widest uppercase">综合霸权总分</p>
                     <p id="charScore" class="text-7xl font-black score-text mb-4 drop-shadow-md">0.0</p>
@@ -124,6 +127,17 @@
                         <p id="idxSocial" class="text-4xl font-black text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]">0</p>
                     </div>
                 </div>
+            </div>
+
+            <div class="col-span-1 lg:col-span-3 glass-panel p-8 relative overflow-hidden border-yellow-500/30">
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-yellow-600 rounded-full blur-[100px] opacity-10 pointer-events-none"></div>
+                <h3 class="text-xl font-black text-white mb-4 flex items-center gap-3 relative z-10">
+                    <span class="text-yellow-400">🏆</span> 商业变现核心定调
+                    <span class="text-xs text-yellow-500/70 border border-yellow-500/30 px-2 py-0.5 rounded">战略级总结</span>
+                </h3>
+                <p id="commercialVerdict" class="text-gray-300 text-lg leading-relaxed bg-gray-900/60 p-6 rounded-xl border border-gray-700 relative z-10 shadow-inner">
+                    正在分析商业变现定调...
+                </p>
             </div>
 
             <div class="col-span-1 lg:col-span-3 glass-panel p-8 relative overflow-hidden border-purple-500/40">
@@ -163,6 +177,25 @@
                 </div>
             </div>
 
+            <div class="col-span-1 lg:col-span-3 glass-panel p-8">
+                <h3 class="text-xl font-black text-white mb-6 flex items-center gap-3">
+                    <span class="text-cyan-400">🧬</span> 基础属性与设定库
+                    <span class="text-xs text-gray-500 font-normal border border-gray-700 px-2 py-1 rounded">周边设计词源库</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-800">
+                        <p class="text-base text-indigo-400 mb-3 font-bold border-b border-gray-700 pb-2">👁️ 视觉与外观特征</p>
+                        <div id="tagsVisual" class="mb-6 flex flex-wrap"></div>
+                        <p class="text-base text-pink-400 mb-3 font-bold border-b border-gray-700 pb-2">🎭 性格与专长设定</p>
+                        <div id="tagsPersona" class="flex flex-wrap"></div>
+                    </div>
+                    <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-800">
+                        <p class="text-base text-green-400 mb-3 font-bold border-b border-gray-700 pb-2">⚔️ 社交动态与共鸣</p>
+                        <div id="tagsResonance" class="flex flex-wrap"></div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-span-1 lg:col-span-3 glass-panel p-8 mb-20">
                 <h3 class="text-xl font-black text-white mb-2 flex items-center gap-3">
                     <span class="text-blue-400">📈</span> 超高颗粒度热度趋势分析 (1年期全景)
@@ -185,8 +218,8 @@
         </div>
     </div>
 
-<script>
-        // 🚀 核心：修改为你自己的两扇门 Webhook 地址
+    <script>
+        // 🚀 核心：修改为你自己的 Webhook 地址
         const WEBHOOK_START = "https://zcaaron7.app.n8n.cloud/webhook/start_research"; 
         const WEBHOOK_CHECK = "https://zcaaron7.app.n8n.cloud/webhook/check_result";   
         
@@ -197,7 +230,6 @@
 
         const escapeHTML = (str) => String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 
-        // 🌟 本地记忆
         window.addEventListener('DOMContentLoaded', () => {
             const savedDataStr = localStorage.getItem('lastIPData');
             const savedName = localStorage.getItem('lastIPName');
@@ -211,79 +243,28 @@
             }
         });
 
-        // 🔥 深度商业咨询级解读文案库
         const metricsDict = {
-            'global_score': { 
-                title: '综合霸权总分 (Global Verdict)', 
-                source: '多维数据综合加权模型 (雷达60% + 商业40%)', 
-                desc: '该角色的终极商业潜能评级。<br><br><strong style="color:#10b981;">S-Tier (80分以上)</strong>：绝对的摇钱树，拥有极强且全面的变现能力，闭眼接快消品联名和高客单价全品类周边。<br><strong style="color:#3b82f6;">A-Tier (60-80分)</strong>：优秀的中坚力量，某几项指标突出，适合垂直品类开发。<br><strong style="color:#f59e0b;">B-Tier及以下</strong>：通常指在特定小圈子内活跃，或是过气老IP，商业化需谨慎，切忌盲目囤货压库存。' 
-            },
-            '社区底盘': { 
-                title: '社区底盘 (Community Foundation)', 
-                source: 'MyAnimeList, AniList 等核心动漫数据库', 
-                desc: '反映角色在硬核二次元受众中的“死忠粉”规模和忠诚度。<br><br>分数越高，说明受众越稳固，不会因为短期没有动画播出就迅速被遗忘。这是 IP 能够进行<strong style="color:#00f2fe;">长尾变现（长线赚钱）</strong>的最底层基石。底盘高的角色，出谷子（周边）永远有核心粉丝兜底。' 
-            },
-            '视觉同人': { 
-                title: '视觉同人产出 (Visual Art & Fanart)', 
-                source: 'Danbooru, Pixiv 等图库数据聚合', 
-                desc: '反映全球画师对该角色的创作热情与“涩气/审美”认可度。<br><br>分数越高，说明角色的外观设计极其成功，极具视觉吸引力。这是决定该角色是否能制作<strong style="color:#00f2fe;">手办、立牌、徽章（吧唧）甚至服装印花</strong>等实体周边最直接的先行指标！' 
-            },
-            '视频破圈': { 
-                title: '视频破圈传播 (Video Virality)', 
-                source: 'TikTok, YouTube 播放互动聚合', 
-                desc: '反映角色跨出二次元核心圈层、吸引“泛大众用户”的能力。<br><br>破圈分越高的角色，越适合开展<strong style="color:#00f2fe;">快消品联名（奶茶、快餐）和游戏买量宣发</strong>。这种角色自带流量，能够极大地降低品牌的获客和营销成本。' 
-            },
-            '剧情厚度': { 
-                title: '剧情厚度 (Lore Depth)', 
-                source: 'Fandom Wiki 等硬核维基字数统计', 
-                desc: '反映角色人设的丰满程度与成长线的深度。<br><br>单薄的角色只能卖脸，但剧情厚度极高的角色，粉丝对 ta 拥有极强的“情感羁绊”。这使得品牌能够进行<strong style="color:#00f2fe;">深度故事化营销</strong>，从而赋予周边产品极高的品牌溢价（粉丝愿意为了情怀付高价）。' 
-            },
-            '即时热度': { 
-                title: '即时热度 (Immediate Search Trend)', 
-                source: 'Google Trends 全网趋势风向', 
-                desc: '反映角色近期在全球搜索引擎上的热度风向标。<br><br>这是一个<strong style="color:#00f2fe;">时机指标</strong>。如果热度处于高位，说明近期有动画更新、大事件或出圈爆梗，是品牌“蹭热点”进行营销宣发、上架预售的最佳窗口期。' 
-            },
-            'tiktok': { 
-                title: 'TikTok 短视频爆款指数', 
-                source: '短视频双轨制变现计算模型', 
-                desc: '判定角色是否具备短视频病毒式传播潜质。<br><br>高分角色极其适合应用于短视频带货、二创切片投流、Cosplay 变装挑战。这类角色通常具有极其吸睛的外观或强烈的反差动作（如：换装、舞蹈卡点），能够迅速抓住用户眼球。' 
-            },
-            'merch': { 
-                title: '周边开发指数 (Merchandise Viability)', 
-                source: '视觉基数 × 变体数量 × 属性加权', 
-                desc: '直观预判角色实体商品的转化率与开模可行性。<br><br>系统深度考量了角色的服装变体数量（换装多意味着能出更多不同款的周边）。分数越高，开模做手办、立牌的稳赚概率越大，是厂商防坑的绝对核心指标。' 
-            },
-            'social': { 
-                title: 'CP 二创裂变指数 (Social & Shipping)', 
-                source: '剧情厚度 × 粉丝互动关系活跃度', 
-                desc: '衡量角色引发粉丝自发产出“同人羁绊关系（CP组合）”的能力。<br><br>高分代表粉丝极度热衷于讨论 ta 的人际关系。这种角色<strong style="color:#00f2fe;">极其适合“捆绑销售”</strong>——出双人立牌、互动徽章、或者举办线下主题咖啡厅（Cafe）联动，通过 CP 效应榨取双倍利润。' 
-            },
-            'ai_archetype': { 
-                title: '核心人设原型 (AI Core Archetype)', 
-                source: 'Claude KIE 引擎维基生肉推演', 
-                desc: '由大模型根据数万字外网维基资料提炼的底层人设词条。<br><br>直接用于指导品牌联动时的<strong style="color:#00f2fe;">“人设与品牌调性匹配度”</strong>。例如：冷酷刺客型适合联动电竞外设或潮牌；元气吃货型适合联动零食连锁；病娇型适合特定香水或美妆。' 
-            },
-            'ai_gapmoe': { 
-                title: '反差萌卖点 (AI Gap Moe Analysis)', 
-                source: 'Claude KIE 引擎剧情高光提取', 
-                desc: '二次元造神与刺激消费的绝对核心驱动力！<br><br>“反差萌”是击穿受众心理防线、让粉丝愿意爆金币的最强武器。这部分解析直接指导了文案团队该如何撰写带货营销通稿，以及视频团队该设计怎样的短视频切片剧本。' 
-            },
-            'ai_emotion': { 
-                title: '受众情绪价值 (AI Emotional Resonance)', 
-                source: 'Claude KIE 引擎粉圈心理测写', 
-                desc: '深层剖析粉丝到底是基于什么心理在为这个角色掏钱。<br><br>是出于慕强的崇拜？怜爱的保护欲？还是理想化自我的代入？明确情绪价值，产品设计师才能精准把控周边的“设计基调”（是做帅气的战斗手办，还是做可爱的趴趴公仔）。' 
-            }
+            'global_score': { title: '综合霸权总分', source: '加权模型', desc: '该角色的终极商业潜能评级。<br><br><strong style="color:#10b981;">S-Tier (80分以上)</strong>：绝对的摇钱树，闭眼接周边。<br><strong style="color:#3b82f6;">A-Tier (60-80分)</strong>：优秀中坚力量。<br><strong style="color:#f59e0b;">B-Tier及以下</strong>：商业化需谨慎。' },
+            '社区底盘': { title: '社区底盘', source: '动漫数据库', desc: '反映核心死忠粉规模，是长尾变现的基石。' },
+            '视觉同人': { title: '视觉同人产出', source: '图库数据聚合', desc: '反映外观设计成功度，决定周边销量下限。' },
+            '视频破圈': { title: '视频破圈传播', source: '短视频聚合', desc: '跨圈层吸引大众的能力，适合快消品联名。' },
+            '剧情厚度': { title: '剧情厚度', source: '维基百科', desc: '人设的丰满程度，赋予周边情感溢价。' },
+            '即时热度': { title: '即时热度', source: '全网趋势风向', desc: '反映近期关注度，决定是否适合马上开团预售。' },
+            'tiktok': { title: 'TikTok 爆款指数', source: '短视频变现模型', desc: '极高带货与切片分发潜力。' },
+            'merch': { title: '周边开发指数', source: '变现模型', desc: '直观预判角色实体商品（手办、立牌）转化率。' },
+            'social': { title: 'CP 二创裂变指数', source: '变现模型', desc: '衡量羁绊讨论热度，适合出双人捆绑周边。' },
+            'ai_archetype': { title: '核心人设原型', source: '大模型推演', desc: '指导品牌联动时的“人设与调性匹配度”。' },
+            'ai_gapmoe': { title: '反差萌卖点', source: '大模型推演', desc: '击穿受众心理防线，直接指导带货通稿。' },
+            'ai_emotion': { title: '受众情绪价值', source: '大模型推演', desc: '剖析粉丝氪金心理，把控周边设计基调。' }
         };
 
         function closeModal() { document.getElementById('infoModal').classList.add('hidden'); }
         function openModal(key, title, source, desc) {
             if (title) {
-                // 自定义弹窗 (给梗百科和标签用的)
                 document.getElementById('modalTitle').innerText = title;
                 document.getElementById('modalSource').innerText = source || "AI 深度挖掘";
                 document.getElementById('modalDesc').innerHTML = desc || "暂无解读";
             } else {
-                // 读取字典 (给雷达图和评分卡片用的)
                 const data = metricsDict[key];
                 if (!data) return;
                 document.getElementById('modalTitle').innerText = data.title;
@@ -293,9 +274,6 @@
             document.getElementById('infoModal').classList.remove('hidden');
         }
 
-        // ==========================================
-        // 🔥 核心优化：智能休眠轮询 (60秒休眠 + 20秒间隔，极致省钱)
-        // ==========================================
         async function startSearch() {
             const inputVal = document.getElementById('searchInput').value.trim();
             if (!inputVal) return alert("请输入角色名称！");
@@ -315,16 +293,14 @@
             clearInterval(pollInterval);
             let fakeProgress = 5;
 
-            // 1. 发令枪：发射爬虫指令
             try {
                 fetch(WEBHOOK_START, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ character: inputVal })
-                }).catch(()=>console.log("发令触发完毕"));
+                }).catch(()=>{});
             } catch (e) { }
 
-            // 纯前端 UI 动画（不耗费任何请求）
             progressInterval = setInterval(() => {
                 if (fakeProgress < 92) {
                     fakeProgress += (Math.random() * 0.8 + 0.2);
@@ -336,20 +312,16 @@
                 }
             }, 1500);
 
-            // 2. ⚡ 核心护城河：强制休眠 60 秒！
             setTimeout(() => {
                 let pollAttempts = 0;
-                
-                // 60秒后苏醒，开始每 20 秒查一次 (极致降低频率)
                 pollInterval = setInterval(async () => {
                     pollAttempts++;
-                    if(pollAttempts > 10) { // 监控超时保护 (等待 60s + 200s = 4分20秒)
+                    if(pollAttempts > 10) {
                         clearInterval(pollInterval); clearInterval(progressInterval);
                         alert("抱歉，分析耗时过长。请稍后再试。");
                         document.getElementById('loadingState').classList.add('hidden');
                         return;
                     }
-
                     try {
                         const checkUrl = `${WEBHOOK_CHECK}?page_size=500`;
                         const res = await fetch(checkUrl);
@@ -363,23 +335,16 @@
 
                         if (!records || records.length === 0) return;
 
-                        // 🔥 核心防线升级：模糊匹配 + 寻找最新记录！
-                        // 使用 [...records].reverse() 从表格最底部（最新写入的数据）开始找
                         let matchedRecord = [...records].reverse().find(r => {
                             let fields = r.fields || r;
                             let nameInFeishu = fields["角色名"];
                             if (Array.isArray(nameInFeishu)) nameInFeishu = nameInFeishu[0]?.text || nameInFeishu[0];
-                            
                             let dbName = String(nameInFeishu).toLowerCase().trim();
                             let searchName = inputVal.toLowerCase().trim();
-                            
-                            // 只要飞书里的名字包含了搜索词，或者搜索词包含了飞书里的名字，都算匹配成功！
-                            // 例如: 搜索 "Hinata Hyuuga" 可以匹配到飞书里的 "Hinata"
                             return searchName.includes(dbName) || dbName.includes(searchName);
                         });
 
                         if (matchedRecord) {
-                            // 查到了！停止轮询
                             clearInterval(pollInterval);
                             clearInterval(progressInterval);
                             let rawData = matchedRecord; 
@@ -398,9 +363,8 @@
                             }, 800);
                         }
                     } catch (e) { console.log("轮询检测中..."); }
-                }, 20000); // 🚀 间隔改成了 20000 毫秒 (20秒)
-                
-            }, 120000); // 强制休眠 120,000 毫秒 (120秒)
+                }, 20000); 
+            }, 60000); 
         }
 
         function renderData(rawData) {
@@ -410,6 +374,12 @@
             document.getElementById('charCategory').innerText = fields["IP类别"] || 'N/A';
             document.getElementById('charScore').innerText = fields["霸权总分"] || 0;
             document.getElementById('charTier').innerText = fields["市场评级"] || 'N/A';
+            
+            // 🔥 新增：生命周期渲染
+            document.getElementById('charLifecycle').innerText = fields["生命周期"] || '未知周期';
+            
+            // 🔥 新增：商业变现定调渲染
+            document.getElementById('commercialVerdict').innerText = fields["商业变现定调"] || '正在生成多维度商业判断...';
 
             let avatarObj = fields["主视觉图"];
             let avatarUrl = (typeof avatarObj === 'object' && avatarObj !== null) ? (avatarObj.link || avatarObj.url) : avatarObj;
@@ -425,8 +395,10 @@
             document.getElementById('aiGapMoe').innerText = fields["反差萌卖点"] || "暂无数据";
             document.getElementById('aiEmotion').innerText = fields["受众情绪价值"] || "暂无数据";
 
+            // 解析标签（支持原生数组，或被飞书存成的 "A | B | C" 字符串格式）
             const parseStrToArray = (str) => {
-                if (typeof str === 'string' && str !== "暂无数据" && str !== "暂无") return str.split(/ \| |\|/);
+                if (Array.isArray(str)) return str;
+                if (typeof str === 'string' && str !== "暂无数据" && str !== "暂无") return str.split(/ \| |\|/).map(s=>s.trim()).filter(Boolean);
                 return [];
             };
 
@@ -436,10 +408,19 @@
                     : '<span class="text-gray-500 text-sm">暂无标签</span>';
             };
             
-            let v_signs = fields["高频变现视觉符号"] || fields["变现视觉符号"] || "";
-            let d_dirs = fields["高潜二创方向"] || "";
-            renderAITags('aiVisuals', parseStrToArray(v_signs));
-            renderAITags('aiDerivatives', parseStrToArray(d_dirs));
+            const renderNormalTags = (domId, arr) => {
+                document.getElementById(domId).innerHTML = (arr && arr.length > 0) 
+                    ? arr.map(tag => `<span class="tag-pill">${escapeHTML(tag)}</span>`).join('') 
+                    : '<span class="text-gray-500 text-sm">暂无标签</span>';
+            };
+
+            renderAITags('aiVisuals', parseStrToArray(fields["高频变现视觉符号"] || fields["变现视觉符号"]));
+            renderAITags('aiDerivatives', parseStrToArray(fields["高潜二创方向"]));
+
+            // 🔥 新增：基础属性标签库渲染（容错极高，防止飞书改列名）
+            renderNormalTags('tagsVisual', parseStrToArray(fields["视觉与外观特征"] || fields["视觉外观特征"] || ""));
+            renderNormalTags('tagsPersona', parseStrToArray(fields["性格与专长设定"] || fields["性格底色与行为"] || ""));
+            renderNormalTags('tagsResonance', parseStrToArray(fields["社交动态与共鸣"] || ""));
 
             let memesRaw = fields["AI 全球热梗科普"] || "";
             let memesHtml = '';
@@ -467,7 +448,6 @@
             renderTrendChart(fields["1年期热度走势"] || "");
         }
 
-        // 🔥 修复了雷达图点击无响应的 Bug
         function renderRadarChart(radarData) {
             const dom = document.getElementById('radarChart');
             if (radarChartInstance) radarChartInstance.dispose();
@@ -475,21 +455,13 @@
             const option = { 
                 tooltip: { confine: true, backgroundColor: 'rgba(15, 17, 26, 0.95)', borderColor: '#4f46e5', textStyle: { color: '#fff' } }, 
                 radar: { 
-                    radius: '70%', center: ['50%', '55%'], 
-                    triggerEvent: true, // 极其关键：允许点击事件穿透到文字标签
-                    indicator: [ 
-                        { name: '社区底盘', max: 100 }, { name: '视觉同人', max: 100 }, 
-                        { name: '视频破圈', max: 100 }, { name: '剧情厚度', max: 100 }, { name: '即时热度', max: 100 } 
-                    ], 
-                    shape: 'polygon', splitNumber: 4, 
-                    axisName: { color: '#a0aec0', fontSize: 13, fontWeight: 'bold' }, 
-                    splitLine: { lineStyle: { color: ['rgba(99, 102, 241, 0.1)', 'rgba(99, 102, 241, 0.2)', 'rgba(99, 102, 241, 0.4)', 'rgba(99, 102, 241, 0.6)'] } }, 
-                    splitArea: { show: false }, 
-                    axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } } 
+                    radius: '70%', center: ['50%', '55%'], triggerEvent: true, 
+                    indicator: [ { name: '社区底盘', max: 100 }, { name: '视觉同人', max: 100 }, { name: '视频破圈', max: 100 }, { name: '剧情厚度', max: 100 }, { name: '即时热度', max: 100 } ], 
+                    shape: 'polygon', splitNumber: 4, axisName: { color: '#a0aec0', fontSize: 13, fontWeight: 'bold' }, 
+                    splitLine: { lineStyle: { color: ['rgba(99, 102, 241, 0.1)', 'rgba(99, 102, 241, 0.2)', 'rgba(99, 102, 241, 0.4)', 'rgba(99, 102, 241, 0.6)'] } }, splitArea: { show: false }, axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } } 
                 }, 
                 series: [{ 
-                    type: 'radar', 
-                    data: [{ 
+                    type: 'radar', data: [{ 
                         value: [ radarData.community_score, radarData.visual_art_score, radarData.video_virality_score, radarData.lore_depth_score, radarData.search_trend_score ], 
                         name: '得分', symbol: 'circle', symbolSize: 8, itemStyle: { color: '#00f2fe', borderColor: '#fff', borderWidth: 2 }, 
                         areaStyle: { color: 'rgba(99, 102, 241, 0.3)' }, lineStyle: { color: '#00f2fe', width: 3, shadowColor: 'rgba(0, 242, 254, 0.8)', shadowBlur: 10 }, 
@@ -498,13 +470,7 @@
                 }] 
             };
             radarChartInstance.setOption(option);
-
-            // 监听雷达图外圈指标名字的点击事件，并呼出弹窗
-            radarChartInstance.on('click', function (params) {
-                if (params.name) {
-                    openModal(params.name);
-                }
-            });
+            radarChartInstance.on('click', function (params) { if (params.name) openModal(params.name); });
         }
 
         function renderTrendChart(trendData) {
