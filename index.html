@@ -61,6 +61,15 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* 弹窗动画 */
+        .modal-enter {
+            animation: fadeInScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body class="min-h-screen p-6 flex flex-col items-center">
@@ -108,21 +117,22 @@
             </div>
 
             <div class="col-span-1 lg:col-span-2 glass-panel p-8 flex flex-col justify-between">
-                <h3 class="text-xl font-black text-white mb-2 flex items-center gap-3">
-                    <span class="text-indigo-400">📊</span> 五维战力雷达盘
+                <h3 class="text-xl font-black text-white mb-2 flex items-center justify-between">
+                    <span class="flex items-center gap-3"><span class="text-indigo-400">📊</span> 五维战力雷达盘</span>
+                    <span class="text-xs text-indigo-300 bg-indigo-900/50 px-3 py-1 rounded-full animate-pulse border border-indigo-500/30">👆 点击各项维度或下方卡片查看解读</span>
                 </h3>
-                <div id="radarChart" class="w-full h-80"></div>
+                <div id="radarChart" class="w-full h-80 cursor-pointer"></div>
                 
                 <div class="grid grid-cols-3 gap-6 mt-6">
-                    <div class="bg-gray-800/50 p-6 rounded-xl text-center border border-gray-700 backdrop-blur-sm">
+                    <div onclick="openModal('tiktok')" class="bg-gray-800/50 p-6 rounded-xl text-center border border-gray-700 backdrop-blur-sm hover:border-pink-500 cursor-pointer transition-all hover:scale-105 hover:bg-gray-800 shadow-lg">
                         <p class="text-sm text-gray-400 mb-2 font-bold tracking-wider">TikTok 爆款指数</p>
                         <p id="idxTiktok" class="text-4xl font-black text-pink-500 drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]">0</p>
                     </div>
-                    <div class="bg-gray-800/50 p-6 rounded-xl text-center border border-gray-700 backdrop-blur-sm">
+                    <div onclick="openModal('merch')" class="bg-gray-800/50 p-6 rounded-xl text-center border border-gray-700 backdrop-blur-sm hover:border-yellow-500 cursor-pointer transition-all hover:scale-105 hover:bg-gray-800 shadow-lg">
                         <p class="text-sm text-gray-400 mb-2 font-bold tracking-wider">周边开发指数</p>
                         <p id="idxMerch" class="text-4xl font-black text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]">0</p>
                     </div>
-                    <div class="bg-gray-800/50 p-6 rounded-xl text-center border border-gray-700 backdrop-blur-sm">
+                    <div onclick="openModal('social')" class="bg-gray-800/50 p-6 rounded-xl text-center border border-gray-700 backdrop-blur-sm hover:border-purple-500 cursor-pointer transition-all hover:scale-105 hover:bg-gray-800 shadow-lg">
                         <p class="text-sm text-gray-400 mb-2 font-bold tracking-wider">CP 二创指数</p>
                         <p id="idxSocial" class="text-4xl font-black text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]">0</p>
                     </div>
@@ -159,12 +169,99 @@
         </div>
     </div>
 
+    <div id="infoModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/60 backdrop-blur-sm transition-opacity">
+        <div class="glass-panel p-8 max-w-lg w-full mx-4 relative neon-glow modal-enter">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white bg-gray-800 hover:bg-red-500/80 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
+                ✕
+            </button>
+            
+            <h3 id="modalTitle" class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-500 mb-2">
+                指标名称
+            </h3>
+            <p id="modalSource" class="text-xs text-indigo-300 mb-6 font-mono bg-indigo-900/30 inline-block px-3 py-1 rounded border border-indigo-500/30">
+                数据源: 正在加载...
+            </p>
+            
+            <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-700 text-gray-300 leading-relaxed text-sm shadow-inner">
+                <p id="modalDesc">解释内容加载中...</p>
+            </div>
+            
+            <button onclick="closeModal()" class="mt-8 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-colors">
+                我知道了
+            </button>
+        </div>
+    </div>
+
     <script>
         // ！！！将这里的 URL 替换为你 n8n Webhook 的 Production URL 或 Test URL ！！！
         const WEBHOOK_URL = "https://zcaaron7.app.n8n.cloud/webhook/start_research"; 
         
         let radarChartInstance = null;
         let trendChartInstance = null;
+
+        // ==========================================
+        // 指标字典：所有的商业解读文案都在这里
+        // ==========================================
+        const metricsDict = {
+            '社区底盘': {
+                title: '社区核心底盘 (Community)',
+                source: 'MyAnimeList, AniList 等全球核心数据库',
+                desc: '<b>💡 商业解读：</b><br>反映角色在核心二次元受众群体中的“死忠粉”规模。分数越高，说明该角色拥有极其稳固的基础受众，不容易因完结而迅速过气。对于 IP 长期长尾变现至关重要。'
+            },
+            '视觉同人': {
+                title: '视觉同人产出 (Visual Art)',
+                source: 'Danbooru, DeviantArt 等主流插画聚合平台',
+                desc: '<b>💡 商业解读：</b><br>反映全球画师群体对该角色的创作热情。分数越高，说明角色外观设计极其成功，具备极高的视觉吸引力（如特定的服饰、发色）。这是制作手办、立牌等实体周边最核心的先行指标。'
+            },
+            '视频破圈': {
+                title: '视频破圈传播 (Video Virality)',
+                source: 'YouTube 全球播放量及标签聚合',
+                desc: '<b>💡 商业解读：</b><br>反映角色在动态视频领域的传播力（如 MMD舞蹈、高燃剪辑、Cosplay 视频）。分数越高，说明角色跨出核心圈层、吸引泛二次元甚至大众用户的能力越强，极其适合开展游戏联动。'
+            },
+            '剧情厚度': {
+                title: '剧情设定厚度 (Lore Depth)',
+                source: 'Fandom Wiki 等硬核考据维基百科',
+                desc: '<b>💡 商业解读：</b><br>反映角色背后的故事设定复杂度与剧情参与度。分数越高，说明角色人设越丰满（可能带有美强惨、复杂背景等属性），极具话题度，适合深度的剧情向衍生开发。'
+            },
+            '即时热度': {
+                title: '即时搜索趋势 (Search Trend)',
+                source: 'Google Trends 全网实时搜素指数',
+                desc: '<b>💡 商业解读：</b><br>反映角色近期的全网热度风向标。如果分数较高，说明角色目前正处于爆发风口（可能是因为正在热播、推出了新皮肤或爆发了热门梗），是品牌蹭热度进行营销宣发的最佳时机。'
+            },
+            'tiktok': {
+                title: 'TikTok 短视频爆款指数',
+                source: '雷达计算模型（高视频传播力 × 强视觉表现力）',
+                desc: '<b>💡 商业解读：</b><br>系统自动判定该角色是否具备在短视频平台引发病毒式传播的潜质。例如：具有独特的变装属性、适合卡点剪辑的战斗动作、或是适合翻跳的标志性舞蹈。高分角色是短视频带货和投流的最佳选择。'
+            },
+            'merch': {
+                title: '实物周边开发指数',
+                source: '雷达计算模型（同人图基数 × 官方/二创服装变体数量）',
+                desc: '<b>💡 商业解读：</b><br>直接预判角色实体商品的转化率。系统不仅看角色人气，还会识别角色是否有多种热门穿搭（如常服、泳装、战损）。变体越多，视觉分越高，说明该角色出任何衣服形态的手办/潮服都能被市场买单。'
+            },
+            'social': {
+                title: 'CP 二创情感裂变指数',
+                source: '雷达计算模型（剧情厚度 × 粉丝互动活跃度）',
+                desc: '<b>💡 商业解读：</b><br>衡量角色引发粉丝自发产出“同人关系链（CP）”的能力。高分角色通常拥有极强的宿敌、救赎或羁绊设定。这种情感消费是二次元最强的氪金动力之一，极其适合出双人立牌、互动吧唧等成对周边。'
+            }
+        };
+
+        // 打开弹窗的函数
+        function openModal(metricKey) {
+            const data = metricsDict[metricKey];
+            if (!data) return;
+            
+            document.getElementById('modalTitle').innerText = data.title;
+            document.getElementById('modalSource').innerText = `数据源: ${data.source}`;
+            document.getElementById('modalDesc').innerHTML = data.desc;
+            
+            const modal = document.getElementById('infoModal');
+            modal.classList.remove('hidden');
+        }
+
+        // 关闭弹窗的函数
+        function closeModal() {
+            document.getElementById('infoModal').classList.add('hidden');
+        }
 
         async function startSearch() {
             const inputVal = document.getElementById('searchInput').value.trim();
@@ -185,15 +282,12 @@
                 const responseData = await response.json();
                 const data = Array.isArray(responseData) ? responseData[0].json : (responseData.json || responseData);
                 
-                // 【核心修复区域】：先显示面板，再画图，彻底解决 ECharts 被挤压成一条线的问题！
                 document.getElementById('loadingState').classList.add('hidden');
                 document.getElementById('loadingState').classList.remove('flex');
                 document.getElementById('resultsContainer').classList.remove('hidden');
 
-                // 稍微延迟 50 毫秒，等浏览器把盒子的宽度算好，再开始往里面塞图表
                 setTimeout(() => {
                     renderData(data);
-                    // 强制调整一次大小，双重保险
                     if (radarChartInstance) radarChartInstance.resize();
                     if (trendChartInstance) trendChartInstance.resize();
                 }, 50);
@@ -240,14 +334,12 @@
 
         function renderRadarChart(radarData) {
             const dom = document.getElementById('radarChart');
-            // 如果之前画过，先销毁重新画，确保尺寸正确
             if (radarChartInstance) radarChartInstance.dispose();
             radarChartInstance = echarts.init(dom);
             
             const option = {
                 tooltip: { confine: true, backgroundColor: 'rgba(20, 20, 30, 0.9)', textStyle: { color: '#fff' } },
                 radar: {
-                    // 【核心修复】：把雷达图拉大，撑满容器
                     radius: '70%',
                     center: ['50%', '55%'],
                     indicator: [
@@ -259,7 +351,9 @@
                     ],
                     shape: 'polygon',
                     splitNumber: 4,
+                    // 【核心改动】：让雷达图的外围文字可以被点击 (triggerEvent)
                     axisName: { color: '#a0aec0', fontSize: 13, fontWeight: 'bold' },
+                    triggerEvent: true, 
                     splitLine: { lineStyle: { color: ['rgba(99, 102, 241, 0.1)', 'rgba(99, 102, 241, 0.2)', 'rgba(99, 102, 241, 0.4)', 'rgba(99, 102, 241, 0.6)'] } },
                     splitArea: { show: false },
                     axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }
@@ -293,6 +387,14 @@
                 }]
             };
             radarChartInstance.setOption(option);
+
+            // 【监听雷达图点击事件】
+            radarChartInstance.on('click', function (params) {
+                // 如果用户点击的是雷达图周边的文字 (如"社区底盘")
+                if (params.componentType === 'radar' && params.name) {
+                    openModal(params.name);
+                }
+            });
         }
 
         function renderTrendChart(trendArray) {
@@ -323,7 +425,6 @@
                     borderColor: '#00f2fe',
                     textStyle: { color: '#fff' }
                 },
-                // 【核心修复】：让网格完全撑满父级容器，左右两边不再留巨大白边
                 grid: { left: '3%', right: '3%', bottom: '5%', top: '8%', containLabel: true },
                 xAxis: {
                     type: 'category',
