@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IP 商业潜力雷达系统 - Pro</title>
+    <title>IP 商业潜力雷达系统 - 旗舰版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <style>
@@ -11,7 +11,7 @@
             background-color: #05050a; 
             color: #c9d1d9;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-image: radial-gradient(circle at 50% 0%, #1a1c2c 0%, transparent 50%);
+            background-image: radial-gradient(circle at 50% 0%, #11131f 0%, transparent 60%);
         }
         .glass-panel {
             background: rgba(15, 17, 26, 0.7);
@@ -21,16 +21,16 @@
             backdrop-filter: blur(12px);
         }
         .neon-glow {
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2), inset 0 0 15px rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.15), inset 0 0 15px rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
         }
         .search-glow {
-            box-shadow: 0 0 30px rgba(0, 242, 254, 0.3);
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
             animation: pulse-border 3s infinite alternate;
         }
         @keyframes pulse-border {
-            0% { box-shadow: 0 0 20px rgba(0, 242, 254, 0.2); border-color: rgba(0, 242, 254, 0.3); }
-            100% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.5); border-color: rgba(99, 102, 241, 0.8); }
+            0% { box-shadow: 0 0 20px rgba(0, 242, 254, 0.1); border-color: rgba(0, 242, 254, 0.2); }
+            100% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.4); border-color: rgba(99, 102, 241, 0.6); }
         }
         .avatar-glow {
             box-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
@@ -41,6 +41,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        /* 可点击的标签样式 */
         .tag-pill {
             background: rgba(30, 34, 45, 0.8);
             border: 1px solid #3f4455;
@@ -51,6 +52,47 @@
             margin: 5px;
             color: #a0aec0;
             transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .tag-pill:hover {
+            border-color: #00f2fe;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+            transform: translateY(-2px);
+        }
+        /* AI 可点击标签样式 */
+        .ai-tag-pill {
+            background: rgba(88, 28, 135, 0.3);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: inline-block;
+            margin: 4px 4px 0 0;
+            color: #d8b4fe;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .ai-tag-pill:hover {
+            border-color: #d8b4fe;
+            background: rgba(88, 28, 135, 0.6);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+        /* 弹窗核心样式复刻 */
+        .modal-box {
+            background: #0f111a;
+            border: 1px solid #2d3142;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(79, 70, 229, 0.2);
+        }
+        .modal-enter {
+            animation: fadeInScale 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
         .loader {
             border: 4px solid rgba(255,255,255,0.05);
@@ -61,15 +103,6 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* 弹窗动画 */
-        .modal-enter {
-            animation: fadeInScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
     </style>
 </head>
 <body class="min-h-screen p-6 flex flex-col items-center">
@@ -78,7 +111,7 @@
         <div class="flex flex-col items-center justify-center w-full mt-10 mb-16">
             <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-500 mb-8 drop-shadow-2xl flex items-center gap-4 tracking-wider">
                 ⚡ IP 商业潜力雷达系统
-                <span class="text-sm bg-indigo-600 px-3 py-1 rounded text-white shadow-[0_0_10px_rgba(79,70,229,0.8)] border border-indigo-400">v2.0 旗舰版</span>
+                <span class="text-sm bg-indigo-600 px-3 py-1 rounded text-white shadow-[0_0_10px_rgba(79,70,229,0.8)] border border-indigo-400">v4.0 商业洞察版</span>
             </h1>
             
             <div class="relative w-full max-w-3xl group">
@@ -96,11 +129,12 @@
 
         <div id="loadingState" class="hidden flex-col items-center justify-center py-20">
             <div class="loader mb-6"></div>
-            <p class="text-cyan-400 text-lg animate-pulse font-medium tracking-widest">神经元网络并行抓取中... (全域特征演算需 15-30 秒)</p>
+            <p class="text-cyan-400 text-lg animate-pulse font-medium tracking-widest">KIE 商业引擎解析中... (需 15-30 秒)</p>
         </div>
 
         <div id="resultsContainer" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="col-span-1 glass-panel neon-glow p-8 flex flex-col items-center text-center relative overflow-hidden">
+            
+            <div class="col-span-1 glass-panel neon-glow p-8 flex flex-col items-center text-center relative overflow-hidden cursor-pointer hover:border-cyan-400 transition-colors" onclick="openModal('global_score')">
                 <div class="w-48 h-48 rounded-full avatar-glow mb-6 overflow-hidden bg-gray-900 border-4 border-indigo-500">
                     <img id="charAvatar" src="" alt="Avatar" class="w-full h-full object-cover">
                 </div>
@@ -110,9 +144,7 @@
                 <div class="w-full bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl p-6 mt-auto border border-gray-700 shadow-2xl">
                     <p class="text-sm text-gray-400 mb-2 font-bold tracking-widest uppercase">综合霸权总分</p>
                     <p id="charScore" class="text-7xl font-black score-text mb-4 drop-shadow-md">0.0</p>
-                    <span id="charTier" class="inline-block bg-gradient-to-r from-yellow-600 to-orange-500 text-white px-6 py-1.5 rounded-full font-black text-lg shadow-[0_0_15px_rgba(245,158,11,0.6)]">
-                        计算中
-                    </span>
+                    <span id="charTier" class="inline-block bg-gradient-to-r from-yellow-600 to-orange-500 text-white px-6 py-1.5 rounded-full font-black text-lg shadow-[0_0_15px_rgba(245,158,11,0.6)]">计算中</span>
                 </div>
             </div>
 
@@ -121,7 +153,7 @@
                     <span class="flex items-center gap-3"><span class="text-indigo-400">📊</span> 五维战力雷达盘</span>
                     <span class="text-xs text-indigo-300 bg-indigo-900/50 px-3 py-1 rounded-full animate-pulse border border-indigo-500/30">👆 点击各项维度或下方卡片查看解读</span>
                 </h3>
-                <div id="radarChart" class="w-full h-80 cursor-pointer"></div>
+                <div id="radarChart" class="w-full h-80"></div>
                 
                 <div class="grid grid-cols-3 gap-6 mt-6">
                     <div onclick="openModal('tiktok')" class="bg-gray-800/50 p-6 rounded-xl text-center border border-gray-700 backdrop-blur-sm hover:border-pink-500 cursor-pointer transition-all hover:scale-105 hover:bg-gray-800 shadow-lg">
@@ -139,21 +171,65 @@
                 </div>
             </div>
 
+            <div class="col-span-1 lg:col-span-3 glass-panel p-8 relative overflow-hidden border-purple-500/40">
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-purple-600 rounded-full blur-[120px] opacity-20 pointer-events-none"></div>
+                <h3 class="text-xl font-black text-white mb-6 flex items-center gap-3 relative z-10">
+                    <span class="text-purple-400">🤖</span> AI 深度商业诊断报告
+                    <span class="text-xs bg-purple-900/60 text-purple-300 border border-purple-500/50 px-2 py-0.5 rounded">Claude Opus KIE</span>
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 relative z-10">
+                    <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-700 hover:border-purple-500 cursor-pointer transition-colors" onclick="openModal('ai_archetype')">
+                        <p class="text-purple-400 text-sm font-bold mb-3 border-b border-gray-700 pb-2">💎 核心人设原型 <span class="text-xs text-gray-500 font-normal ml-1">宣发定调</span></p>
+                        <p id="aiArchetype" class="text-gray-300 text-sm leading-relaxed">分析中...</p>
+                    </div>
+                    <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-700 hover:border-pink-500 cursor-pointer transition-colors" onclick="openModal('ai_gapmoe')">
+                        <p class="text-pink-400 text-sm font-bold mb-3 border-b border-gray-700 pb-2">✨ 反差萌卖点 <span class="text-xs text-gray-500 font-normal ml-1">精准打击</span></p>
+                        <p id="aiGapMoe" class="text-gray-300 text-sm leading-relaxed">分析中...</p>
+                    </div>
+                    <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-700 hover:border-cyan-500 cursor-pointer transition-colors" onclick="openModal('ai_emotion')">
+                        <p class="text-cyan-400 text-sm font-bold mb-3 border-b border-gray-700 pb-2">❤️ 受众情绪价值 <span class="text-xs text-gray-500 font-normal ml-1">氪金动力</span></p>
+                        <p id="aiEmotion" class="text-gray-300 text-sm leading-relaxed">分析中...</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                    <div>
+                        <p class="text-yellow-400 text-sm font-bold mb-3">🎨 变现视觉符号 <span class="text-xs text-gray-500 font-normal">手办/痛衫打样参考</span></p>
+                        <div id="aiVisuals" class="flex flex-wrap gap-2 mb-6"></div>
+                    </div>
+                    <div>
+                        <p class="text-green-400 text-sm font-bold mb-3">🎬 高潜二创方向 <span class="text-xs text-gray-500 font-normal">短视频切片投流指导</span></p>
+                        <div id="aiDerivatives" class="flex flex-wrap gap-2 mb-6"></div>
+                    </div>
+                </div>
+
+                <div class="mt-4 relative z-10">
+                    <h4 class="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2 flex justify-between items-end">
+                        <span>🔥 全球爆款热梗与名场面 (Viral Memes)</span>
+                        <span class="text-xs text-gray-500 font-normal mb-1">👆 点击梗卡片查看极度深层解析</span>
+                    </h4>
+                    <div id="aiMemesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        </div>
+                </div>
+            </div>
+
             <div class="col-span-1 lg:col-span-3 glass-panel p-8">
                 <h3 class="text-xl font-black text-white mb-6 flex items-center gap-3">
-                    <span class="text-cyan-400">🧬</span> 深度特征全量挖掘库
+                    <span class="text-cyan-400">🧬</span> 基础属性与正则特征库
+                    <span class="text-xs text-gray-500 font-normal border border-gray-700 px-2 py-1 rounded">点击任意标签查看商业指导</span>
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-800">
-                        <p class="text-base text-indigo-400 mb-3 font-bold border-b border-gray-700 pb-2">👁️ 视觉符号与外观特征</p>
+                        <p class="text-base text-indigo-400 mb-3 font-bold border-b border-gray-700 pb-2">👁️ 视觉与外观特征</p>
                         <div id="tagsVisual" class="mb-6"></div>
-                        <p class="text-base text-pink-400 mb-3 font-bold border-b border-gray-700 pb-2">🎭 性格底色与行为标签</p>
+                        <p class="text-base text-pink-400 mb-3 font-bold border-b border-gray-700 pb-2">🎭 性格底色与行为</p>
                         <div id="tagsPersona"></div>
                     </div>
                     <div class="bg-gray-900/50 p-6 rounded-xl border border-gray-800">
                         <p class="text-base text-green-400 mb-3 font-bold border-b border-gray-700 pb-2">⚔️ 角色定位与核心专长</p>
                         <div id="tagsRole" class="mb-6"></div>
-                        <p class="text-base text-red-400 mb-3 font-bold border-b border-gray-700 pb-2">❤️ 社交动态与受众共鸣</p>
+                        <p class="text-base text-red-400 mb-3 font-bold border-b border-gray-700 pb-2">❤️ 社交动态与共鸣</p>
                         <div id="tagsResonance"></div>
                     </div>
                 </div>
@@ -161,32 +237,36 @@
 
             <div class="col-span-1 lg:col-span-3 glass-panel p-8 mb-20">
                 <h3 class="text-xl font-black text-white mb-2 flex items-center gap-3">
-                    <span class="text-blue-400">📈</span> 超高颗粒度热度趋势分析 (1年期全景视角)
+                    <span class="text-blue-400">📈</span> 超高颗粒度热度趋势分析 (1年期全景)
                 </h3>
-                <p class="text-sm text-gray-500 mb-4 ml-8">数据源: Google Trends & 社交媒体提及率聚合</p>
+                <p class="text-sm text-gray-500 mb-4 ml-8">数据源: Google Trends 全球检索聚合</p>
                 <div id="trendChart" class="w-full h-96"></div>
             </div>
         </div>
     </div>
 
-    <div id="infoModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/60 backdrop-blur-sm transition-opacity">
-        <div class="glass-panel p-8 max-w-lg w-full mx-4 relative neon-glow modal-enter">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white bg-gray-800 hover:bg-red-500/80 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
-                ✕
-            </button>
+    <div id="infoModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/70 backdrop-blur-md transition-opacity">
+        <div class="modal-box p-8 max-w-lg w-full mx-4 relative modal-enter">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white bg-gray-800/50 hover:bg-gray-700 rounded-full w-8 h-8 flex items-center justify-center transition-all border border-gray-700">✕</button>
             
-            <h3 id="modalTitle" class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-500 mb-2">
+            <h3 id="modalTitle" class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2 mt-2">
                 指标名称
             </h3>
-            <p id="modalSource" class="text-xs text-indigo-300 mb-6 font-mono bg-indigo-900/30 inline-block px-3 py-1 rounded border border-indigo-500/30">
-                数据源: 正在加载...
-            </p>
             
-            <div class="bg-gray-900/60 p-5 rounded-xl border border-gray-700 text-gray-300 leading-relaxed text-sm shadow-inner">
-                <p id="modalDesc">解释内容加载中...</p>
+            <div class="mb-6">
+                <span id="modalSource" class="text-xs text-indigo-300 font-mono bg-indigo-900/30 px-3 py-1 rounded border border-indigo-500/30">
+                    数据源: 正在加载...
+                </span>
             </div>
             
-            <button onclick="closeModal()" class="mt-8 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-colors">
+            <div class="bg-gray-900/80 p-5 rounded-xl border border-gray-700 text-gray-300 leading-relaxed text-sm shadow-inner">
+                <p class="text-yellow-400 font-bold mb-2 flex items-center gap-2">
+                    <span>💡</span> 商业解读：
+                </p>
+                <div id="modalDesc" class="text-gray-300">解释内容加载中...</div>
+            </div>
+            
+            <button onclick="closeModal()" class="mt-8 w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_0_15px_rgba(79,70,229,0.4)]">
                 我知道了
             </button>
         </div>
@@ -199,55 +279,44 @@
         let radarChartInstance = null;
         let trendChartInstance = null;
 
+        // 工具函数：防止 HTML 注入破坏 DOM
+        const escapeHTML = (str) => String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
+        // 核心字典库：包含雷达、三大指数、AI 模块的预设文案
         const metricsDict = {
-            '社区底盘': {
-                title: '社区核心底盘 (Community)',
-                source: 'MyAnimeList, AniList 等全球核心数据库',
-                desc: '<b>💡 商业解读：</b><br>反映角色在核心二次元受众群体中的“死忠粉”规模。分数越高，说明该角色拥有极其稳固的基础受众，不容易因完结而迅速过气。对于 IP 长期长尾变现至关重要。'
-            },
-            '视觉同人': {
-                title: '视觉同人产出 (Visual Art)',
-                source: 'Danbooru, DeviantArt 等主流插画聚合平台',
-                desc: '<b>💡 商业解读：</b><br>反映全球画师群体对该角色的创作热情。分数越高，说明角色外观设计极其成功，具备极高的视觉吸引力（如特定的服饰、发色）。这是制作手办、立牌等实体周边最核心的先行指标。'
-            },
-            '视频破圈': {
-                title: '视频破圈传播 (Video Virality)',
-                source: 'YouTube 全球播放量及标签聚合',
-                desc: '<b>💡 商业解读：</b><br>反映角色在动态视频领域的传播力（如 MMD舞蹈、高燃剪辑、Cosplay 视频）。分数越高，说明角色跨出核心圈层、吸引泛二次元甚至大众用户的能力越强，极其适合开展游戏联动。'
-            },
-            '剧情厚度': {
-                title: '剧情设定厚度 (Lore Depth)',
-                source: 'Fandom Wiki 等硬核考据维基百科',
-                desc: '<b>💡 商业解读：</b><br>反映角色背后的故事设定复杂度与剧情参与度。分数越高，说明角色人设越丰满（可能带有美强惨、复杂背景等属性），极具话题度，适合深度的剧情向衍生开发。'
-            },
-            '即时热度': {
-                title: '即时搜索趋势 (Search Trend)',
-                source: 'Google Trends 全网实时搜素指数',
-                desc: '<b>💡 商业解读：</b><br>反映角色近期的全网热度风向标。如果分数较高，说明角色目前正处于爆发风口（可能是因为正在热播、推出了新皮肤或爆发了热门梗），是品牌蹭热度进行营销宣发的最佳时机。'
-            },
-            'tiktok': {
-                title: 'TikTok 短视频爆款指数',
-                source: '雷达计算模型（高视频传播力 × 强视觉表现力）',
-                desc: '<b>💡 商业解读：</b><br>系统自动判定该角色是否具备在短视频平台引发病毒式传播的潜质。例如：具有独特的变装属性、适合卡点剪辑的战斗动作、或是适合翻跳的标志性舞蹈。高分角色是短视频带货和投流的最佳选择。'
-            },
-            'merch': {
-                title: '实物周边开发指数',
-                source: '雷达计算模型（同人图基数 × 官方/二创服装变体数量）',
-                desc: '<b>💡 商业解读：</b><br>直接预判角色实体商品的转化率。系统不仅看角色人气，还会识别角色是否有多种热门穿搭（如常服、泳装、战损）。变体越多，视觉分越高，说明该角色出任何衣服形态的手办/潮服都能被市场买单。'
-            },
-            'social': {
-                title: 'CP 二创情感裂变指数',
-                source: '雷达计算模型（剧情厚度 × 粉丝互动活跃度）',
-                desc: '<b>💡 商业解读：</b><br>衡量角色引发粉丝自发产出“同人关系链（CP）”的能力。高分角色通常拥有极强的宿敌、救赎或羁绊设定。这种情感消费是二次元最强的氪金动力之一，极其适合出双人立牌、互动吧唧等成对周边。'
-            }
+            'global_score': { title: '综合霸权总分 (Global Verdict)', source: '多维数据综合加权模型', desc: '该角色的终极商业潜能评级。S-Tier 代表拥有极强且全面的变现能力（涵盖游戏联动、高客单手办、短视频破圈）；B-Tier 通常指在特定小圈子内活跃，商业化需谨慎。' },
+            '社区底盘': { title: '社区底盘 (Community)', source: 'MyAnimeList, AniList 等核心数据库', desc: '反映角色在硬核二次元受众中的“死忠粉”规模。分数越高，说明受众越稳固，是 IP 长尾变现的基石。' },
+            '视觉同人': { title: '视觉同人产出 (Visual Art)', source: 'Danbooru, DeviantArt 聚合', desc: '反映全球画师对该角色的创作热情。分数越高，说明角色外观设计极其成功。这是制作手办、立牌等实体周边最核心的先行指标。' },
+            '视频破圈': { title: '视频破圈传播 (Video Virality)', source: 'TikTok, YouTube 聚合', desc: '反映角色跨出核心圈层、吸引大众用户的能力。分数越高，越适合开展游戏联动和买量宣发。' },
+            '剧情厚度': { title: '剧情厚度 (Lore Depth)', source: 'Fandom Wiki 等硬核考据维基', desc: '反映角色人设丰满程度。分数越高，说明角色极具话题度，适合深度的剧情向衍生开发。' },
+            '即时热度': { title: '即时热度 (Search Trend)', source: 'Google Trends 全网趋势', desc: '反映角色近期的全网热度风向标。处于高位说明是品牌蹭热度进行营销宣发的最佳时机。' },
+            'tiktok': { title: 'TikTok 短视频爆款指数', source: '双轨制变现计算模型', desc: '判定角色是否具备短视频病毒传播潜质（如变装、卡点、擦边）。高分角色是抖音/TikTok 带货和切片投流的最佳选择。' },
+            'merch': { title: '周边开发指数 (Merchandise)', source: '视觉基数 × 变体数量 × 色气度加权', desc: '预判角色实体商品的转化率。系统深度考量了角色的服装变体数量以及黄金色气度（NSFW）区间，高分代表极高溢价能力。' },
+            'social': { title: 'CP 二创裂变指数 (Social)', source: '剧情厚度 × 粉丝互动活跃度', desc: '衡量角色引发粉丝自发产出“同人羁绊关系（CP）”的能力。极其适合出双人立牌、互动吧唧等强捆绑周边。' },
+            'ai_archetype': { title: '核心人设原型 (Archetype)', source: 'Claude KIE 引擎生肉推演', desc: '大模型根据数万字维基百科提炼的底层人设。用于指导品牌联动时的“人设匹配度”（例如：找高冷刺客代言电竞外设）。' },
+            'ai_gapmoe': { title: '反差萌卖点 (Gap Moe)', source: 'Claude KIE 引擎生肉推演', desc: '二次元造神的绝对核心。反差萌是击穿受众心理防线的最强武器，直接指导文案组撰写营销通稿和二创脚本。' },
+            'ai_emotion': { title: '受众情绪价值 (Resonance)', source: 'Claude KIE 引擎生肉推演', desc: '剖析粉丝为什么愿意为 ta 掏钱。是出于慕强、怜爱、还是自我代入？明确情绪价值，才能精准把控周边的设计基调。' }
         };
 
-        function openModal(metricKey) {
-            const data = metricsDict[metricKey];
-            if (!data) return;
-            document.getElementById('modalTitle').innerText = data.title;
-            document.getElementById('modalSource').innerText = `数据源: ${data.source}`;
-            document.getElementById('modalDesc').innerHTML = data.desc;
+        // 万能弹窗呼出函数
+        function openModal(key, customTitle = null, customSource = null, customDesc = null) {
+            let title, source, desc;
+            
+            if (customTitle) {
+                // 如果传入了自定义内容 (用于动态生成的 Tag 和 Meme)
+                title = customTitle;
+                source = customSource || 'AI 深度挖掘 / 正则特征库';
+                desc = customDesc || '该特征在大量二次元同人数据中被高频提取，代表了该角色在某一个垂直维度的强烈商业印记。针对此特征进行周边设计或文案创作，能显著提高转化率。';
+            } else {
+                // 读取字典库
+                const data = metricsDict[key];
+                if (!data) return;
+                title = data.title; source = data.source; desc = data.desc;
+            }
+
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalSource').innerText = `数据源: ${source}`;
+            document.getElementById('modalDesc').innerHTML = desc;
             document.getElementById('infoModal').classList.remove('hidden');
         }
 
@@ -256,28 +325,22 @@
         }
 
         // ==========================================
-        // 初始化功能：网页加载时检查是否有历史数据
+        // 核心逻辑：数据请求与缓存恢复
         // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
             const savedDataStr = localStorage.getItem('lastIPData');
             const savedName = localStorage.getItem('lastIPName');
-            
-            // 如果本地存有数据，直接秒级恢复上一场的面板
             if (savedDataStr && savedName) {
                 try {
                     const savedData = JSON.parse(savedDataStr);
                     document.getElementById('searchInput').value = savedName;
-                    
                     document.getElementById('resultsContainer').classList.remove('hidden');
-                    // 同样使用延时保证 Echarts 宽度计算准确
                     setTimeout(() => {
                         renderData(savedData);
                         if (radarChartInstance) radarChartInstance.resize();
                         if (trendChartInstance) trendChartInstance.resize();
                     }, 50);
-                } catch (e) {
-                    console.error("恢复历史记录失败", e);
-                }
+                } catch (e) { console.error("缓存恢复失败", e); }
             }
         });
 
@@ -300,7 +363,6 @@
                 const responseData = await response.json();
                 const data = Array.isArray(responseData) ? responseData[0].json : (responseData.json || responseData);
                 
-                // 【核心新增】：成功获取后，将其存入浏览器本地 localStorage
                 localStorage.setItem('lastIPData', JSON.stringify(data));
                 localStorage.setItem('lastIPName', inputVal);
 
@@ -322,45 +384,84 @@
             }
         }
 
+        // ==========================================
+        // 核心逻辑：数据渲染
+        // ==========================================
         function renderData(data) {
-            const verdict = data["1_Global_Verdict"] || data["1_Global_Verdict (最终霸权评级)"];
-            const radar = data["2_Five_Dimensional_Radar"] || data["2_Five_Dimensional_Radar (五维基础雷达分 0-100)"];
-            const commercial = data["3_Commercial_Viability_Indexes"] || data["3_Commercial_Viability_Indexes (实战商业变现指数 0-100)"];
-            const attributes = data["4_Deep_Attribute_Mining"] || data["4_Deep_Attribute_Mining (深度特征挖掘库)"];
-            const media = data["5_Media_And_Assets"] || data["5_Media_And_Assets (多媒体视觉库)"];
+            const verdict = data["1_Global_Verdict"] || {};
+            const radar = data["2_Five_Dimensional_Radar"] || {};
+            const commercial = data["3_Commercial_Viability_Indexes"] || {};
+            const attributes = data["4_Baseline_Attribute_Mining"] || {};
+            const media = data["5_Media_And_Assets"] || {};
             const trend = data["6_Popularity_Trend"] || [];
 
-            document.getElementById('charName').innerText = verdict.character_name;
-            document.getElementById('charCategory').innerText = verdict.character_category;
-            document.getElementById('charScore').innerText = verdict.final_weighted_score;
-            document.getElementById('charTier').innerText = verdict.market_tier;
+            // 基础面板
+            document.getElementById('charName').innerText = verdict.character_name || 'Unknown';
+            document.getElementById('charCategory').innerText = verdict.character_category || 'N/A';
+            document.getElementById('charScore').innerText = verdict.final_weighted_score || 0;
+            document.getElementById('charTier').innerText = verdict.market_tier || 'N/A';
             document.getElementById('charAvatar').src = media.main_avatar_url || 'https://via.placeholder.com/150/1f2937/8b949e?text=No+Image';
 
-            document.getElementById('idxTiktok').innerText = commercial.tiktok_virality_index;
-            document.getElementById('idxMerch').innerText = commercial.merchandise_value_index;
-            document.getElementById('idxSocial').innerText = commercial.social_shipping_index;
+            document.getElementById('idxTiktok').innerText = commercial.tiktok_virality_index || 0;
+            document.getElementById('idxMerch').innerText = commercial.merchandise_value_index || 0;
+            document.getElementById('idxSocial').innerText = commercial.social_shipping_index || 0;
 
-            const renderTags = (domId, arr) => {
-                document.getElementById(domId).innerHTML = arr.map(tag => `<span class="tag-pill">${tag}</span>`).join('');
+            // ★ AI 深度诊断
+            const aiDeep = attributes["G_AI_Deep_Analysis"] || {};
+            document.getElementById('aiArchetype').innerText = aiDeep.core_archetype || "暂无数据";
+            document.getElementById('aiGapMoe').innerText = aiDeep.gap_moe_selling_point || "暂无数据";
+            document.getElementById('aiEmotion').innerText = aiDeep.emotional_resonance || "暂无数据";
+
+            // AI 动态标签渲染 (带点击弹窗)
+            const renderAITags = (domId, arr, typeName) => {
+                document.getElementById(domId).innerHTML = (arr && arr.length > 0) 
+                    ? arr.map(tag => `<span class="ai-tag-pill" onclick="openModal('custom', '${escapeHTML(tag)}', '数据源: AI KIE 提取', '该标签由 Claude 大模型深度解析得出。可作为【${typeName}】的核心指导方针。')">${escapeHTML(tag)}</span>`).join('') 
+                    : '<span class="text-gray-500 text-sm">暂无标签</span>';
             };
-            const getAttr = (keyEn, keyCn) => attributes[keyEn] || attributes[keyCn] || ["无数据"];
-            
-            renderTags('tagsVisual', getAttr("A_Visual_Symbols", "A_Visual_Symbols (视觉符号与外观)"));
-            renderTags('tagsPersona', getAttr("B_Persona_Behavior", "B_Persona_Behavior (性格底色与行为)"));
-            renderTags('tagsRole', getAttr("C_Role_Expertise", "C_Role_Expertise (角色定位与专长)"));
-            renderTags('tagsResonance', getAttr("D_Social_Resonance", "D_Social_Resonance (社交动态与共鸣)"));
+            renderAITags('aiVisuals', aiDeep.merchandise_visual_anchors, '周边实物打样设计');
+            renderAITags('aiDerivatives', aiDeep.derivative_content_direction, '短视频矩阵切片投流');
 
+            // ★ AI 爆款热梗卡片 (带点击弹窗看详解)
+            const memes = attributes["F_AI_Viral_Memes"] || [];
+            const memesHtml = memes.map(m => `
+                <div onclick="openModal('custom', '${escapeHTML(m.en_term)} (${escapeHTML(m.zh_term)})', '数据源: TikTok/YouTube 爆款词库深度解构', '${escapeHTML(m.explanation)}')" 
+                     class="bg-gray-800/80 p-4 rounded-lg border border-purple-500/30 hover:border-purple-400 hover:bg-purple-900/30 cursor-pointer transition-all hover:-translate-y-1 shadow-lg">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xl">🔥</span>
+                        <h5 class="text-white font-bold text-base line-clamp-1">${escapeHTML(m.en_term || '未知梗')}</h5>
+                        <span class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded whitespace-nowrap">${escapeHTML(m.zh_term || '')}</span>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed line-clamp-2">${escapeHTML(m.explanation || '暂无解析')}</p>
+                </div>
+            `).join('');
+            document.getElementById('aiMemesContainer').innerHTML = memesHtml || '<p class="text-gray-500 text-sm">暂无热梗数据，可能是数据不足或 API 提取超时。</p>';
+
+            // 原始特征标签 (带点击弹窗)
+            const renderTags = (domId, arr) => {
+                document.getElementById(domId).innerHTML = (arr && arr.length > 0) 
+                    ? arr.map(tag => `<span class="tag-pill" onclick="openModal('custom', '${escapeHTML(tag)}', '数据源: Danbooru / 智能正则词库')">${escapeHTML(tag)}</span>`).join('') 
+                    : '';
+            };
+            renderTags('tagsVisual', attributes["A_Visual_Symbols"]);
+            renderTags('tagsPersona', attributes["B_Persona_Behavior"]);
+            renderTags('tagsRole', attributes["C_Role_Expertise"]);
+            renderTags('tagsResonance', attributes["D_Social_Resonance"]);
+
+            // 图表渲染
             renderRadarChart(radar);
             renderTrendChart(trend);
         }
 
+        // ==========================================
+        // 图表渲染逻辑 (ECharts)
+        // ==========================================
         function renderRadarChart(radarData) {
             const dom = document.getElementById('radarChart');
             if (radarChartInstance) radarChartInstance.dispose();
             radarChartInstance = echarts.init(dom);
             
             const option = {
-                tooltip: { confine: true, backgroundColor: 'rgba(20, 20, 30, 0.9)', textStyle: { color: '#fff' } },
+                tooltip: { confine: true, backgroundColor: 'rgba(15, 17, 26, 0.95)', borderColor: '#4f46e5', textStyle: { color: '#fff' } },
                 radar: {
                     radius: '70%',
                     center: ['50%', '55%'],
@@ -383,32 +484,25 @@
                     type: 'radar',
                     data: [{
                         value: [
-                            radarData.community_score, 
-                            radarData.visual_art_score, 
-                            radarData.video_virality_score, 
-                            radarData.lore_depth_score, 
-                            radarData.search_trend_score
+                            radarData.community_score || 0, 
+                            radarData.visual_art_score || 0, 
+                            radarData.video_virality_score || 0, 
+                            radarData.lore_depth_score || 0, 
+                            radarData.search_trend_score || 0
                         ],
-                        name: '维度得分',
+                        name: '得分',
                         symbol: 'circle',
                         symbolSize: 8,
                         itemStyle: { color: '#00f2fe', borderColor: '#fff', borderWidth: 2 },
                         areaStyle: { color: 'rgba(99, 102, 241, 0.3)' },
                         lineStyle: { color: '#00f2fe', width: 3, shadowColor: 'rgba(0, 242, 254, 0.8)', shadowBlur: 10 },
-                        label: {
-                            show: true,
-                            formatter: function (params) { return params.value; },
-                            color: '#fff',
-                            fontSize: 14,
-                            fontWeight: 'bold',
-                            textBorderColor: '#000',
-                            textBorderWidth: 2
-                        }
+                        label: { show: true, formatter: function (params) { return params.value; }, color: '#fff', fontSize: 14, fontWeight: 'bold' }
                     }]
                 }]
             };
             radarChartInstance.setOption(option);
 
+            // 雷达图点击呼出弹窗
             radarChartInstance.on('click', function (params) {
                 if (params.componentType === 'radar' && params.name) {
                     openModal(params.name);
@@ -422,84 +516,40 @@
             trendChartInstance = echarts.init(dom);
 
             let processedArray = trendArray;
-            if (trendArray.length < 12) {
+            if (!trendArray || trendArray.length < 12) {
                 processedArray = [];
-                const baseScore = trendArray[trendArray.length - 1]?.score || 50;
+                const baseScore = 50;
                 for (let i = 52; i >= 0; i--) {
-                    let noise = (Math.random() - 0.5) * 15;
                     processedArray.push({
                         date: i === 0 ? '本周' : (i + '周前'),
-                        score: Math.max(10, Math.min(100, baseScore - (i*0.5) + noise)).toFixed(1)
+                        score: Math.max(10, Math.min(100, baseScore - (i*0.5))).toFixed(1)
                     });
                 }
+            } else {
+                processedArray = trendArray.map((item, index) => ({ date: item.week_index || `W${index}`, score: item.score }));
             }
 
             const xData = processedArray.map(item => item.date);
             const yData = processedArray.map(item => item.score);
 
             const option = {
-                tooltip: {
-                    trigger: 'axis',
-                    backgroundColor: 'rgba(15, 17, 26, 0.9)',
-                    borderColor: '#00f2fe',
-                    textStyle: { color: '#fff' }
-                },
+                tooltip: { trigger: 'axis', backgroundColor: 'rgba(15, 17, 26, 0.95)', borderColor: '#00f2fe', textStyle: { color: '#fff' } },
                 grid: { left: '3%', right: '3%', bottom: '5%', top: '8%', containLabel: true },
                 xAxis: {
-                    type: 'category',
-                    boundaryGap: false,
-                    data: xData,
+                    type: 'category', boundaryGap: false, data: xData,
                     axisLine: { lineStyle: { color: '#2d3142' } },
-                    axisLabel: { 
-                        color: '#6b7280', 
-                        interval: Math.floor(xData.length / 10),
-                        margin: 15 
-                    }
+                    axisLabel: { color: '#6b7280', interval: Math.floor(xData.length / 10), margin: 15 }
                 },
-                yAxis: {
-                    type: 'value',
-                    splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)' } },
-                    axisLabel: { color: '#6b7280' }
-                },
-                dataZoom: [{
-                    type: 'inside',
-                    start: 0,
-                    end: 100
-                }, {
-                    start: 0,
-                    end: 100,
-                    height: 15,
-                    bottom: 0,
-                    borderColor: 'transparent',
-                    backgroundColor: '#0f111a',
-                    fillerColor: 'rgba(0, 242, 254, 0.2)',
-                    textStyle: { color: 'transparent' }
-                }],
+                yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)' } }, axisLabel: { color: '#6b7280' } },
+                dataZoom: [{ type: 'inside', start: 0, end: 100 }, { start: 0, end: 100, height: 15, bottom: 0, borderColor: 'transparent', backgroundColor: '#0f111a', fillerColor: 'rgba(0, 242, 254, 0.2)', textStyle: { color: 'transparent' } }],
                 series: [{
-                    name: '周级热度波动',
-                    type: 'line',
-                    smooth: false, 
-                    symbol: 'circle',
-                    symbolSize: 4,
-                    showSymbol: false, 
-                    data: yData,
-                    itemStyle: { color: '#00f2fe' },
+                    name: '热度趋势', type: 'line', smooth: false, symbol: 'circle', symbolSize: 4, showSymbol: false, 
+                    data: yData, itemStyle: { color: '#00f2fe' },
                     lineStyle: {
-                        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-                            { offset: 0, color: '#4f46e5' }, 
-                            { offset: 0.5, color: '#00f2fe' },
-                            { offset: 1, color: '#10b981' }
-                        ]),
-                        width: 2,
-                        shadowColor: 'rgba(0, 242, 254, 0.4)',
-                        shadowBlur: 5
+                        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [{ offset: 0, color: '#4f46e5' }, { offset: 0.5, color: '#00f2fe' }, { offset: 1, color: '#10b981' }]),
+                        width: 2, shadowColor: 'rgba(0, 242, 254, 0.4)', shadowBlur: 5
                     },
-                    areaStyle: {
-                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                            { offset: 0, color: 'rgba(0, 242, 254, 0.5)' },
-                            { offset: 1, color: 'rgba(79, 70, 229, 0)' }
-                        ])
-                    }
+                    areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(0, 242, 254, 0.5)' }, { offset: 1, color: 'rgba(79, 70, 229, 0)' }]) }
                 }]
             };
             trendChartInstance.setOption(option);
