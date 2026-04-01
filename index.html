@@ -293,6 +293,9 @@
             document.getElementById('infoModal').classList.remove('hidden');
         }
 
+        // ==========================================
+        // 🔥 核心优化：智能休眠轮询 (60秒休眠 + 20秒间隔，极致省钱)
+        // ==========================================
         async function startSearch() {
             const inputVal = document.getElementById('searchInput').value.trim();
             if (!inputVal) return alert("请输入角色名称！");
@@ -312,14 +315,16 @@
             clearInterval(pollInterval);
             let fakeProgress = 5;
 
+            // 1. 发令枪：发射爬虫指令
             try {
                 fetch(WEBHOOK_START, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ character: inputVal })
-                }).catch(()=>{});
+                }).catch(()=>console.log("发令触发完毕"));
             } catch (e) { }
 
+            // 纯前端 UI 动画（不耗费任何请求）
             progressInterval = setInterval(() => {
                 if (fakeProgress < 92) {
                     fakeProgress += (Math.random() * 0.8 + 0.2);
@@ -331,55 +336,63 @@
                 }
             }, 1500);
 
-            let pollAttempts = 0;
-            pollInterval = setInterval(async () => {
-                pollAttempts++;
-                if(pollAttempts > 60) {
-                    clearInterval(pollInterval); clearInterval(progressInterval);
-                    alert("抱歉，分析耗时过长。请稍后再试。");
-                    document.getElementById('loadingState').classList.add('hidden');
-                    return;
-                }
-                try {
-                    const checkUrl = `${WEBHOOK_CHECK}?page_size=500`;
-                    const res = await fetch(checkUrl);
-                    if (!res.ok) return; 
-                    
-                    const responseData = await res.json();
-                    let records = [];
-                    if (Array.isArray(responseData)) records = responseData;
-                    else if (responseData.data && responseData.data.items) records = responseData.data.items;
-                    else if (responseData.items) records = responseData.items;
-
-                    if (!records || records.length === 0) return;
-
-                    let matchedRecord = records.find(r => {
-                        let fields = r.fields || r;
-                        let nameInFeishu = fields["角色名"];
-                        if (Array.isArray(nameInFeishu)) nameInFeishu = nameInFeishu[0]?.text || nameInFeishu[0];
-                        return String(nameInFeishu).toLowerCase() === inputVal.toLowerCase();
-                    });
-
-                    if (matchedRecord) {
-                        clearInterval(pollInterval);
-                        clearInterval(progressInterval);
-                        let rawData = matchedRecord; 
-                        
-                        localStorage.setItem('lastIPData', JSON.stringify(rawData));
-                        localStorage.setItem('lastIPName', inputVal);
-
-                        progressBar.style.width = '100%'; progressText.innerText = '100%';
-                        statusText.innerText = '飞书入库成功！正在为您渲染...';
-
-                        setTimeout(() => {
-                            document.getElementById('loadingState').classList.add('hidden');
-                            document.getElementById('loadingState').classList.remove('flex');
-                            document.getElementById('resultsContainer').classList.remove('hidden');
-                            renderData(rawData);
-                        }, 800);
+            // 2. ⚡ 核心护城河：强制休眠 60 秒！
+            setTimeout(() => {
+                let pollAttempts = 0;
+                
+                // 60秒后苏醒，开始每 20 秒查一次 (极致降低频率)
+                pollInterval = setInterval(async () => {
+                    pollAttempts++;
+                    if(pollAttempts > 10) { // 监控超时保护 (等待 60s + 200s = 4分20秒)
+                        clearInterval(pollInterval); clearInterval(progressInterval);
+                        alert("抱歉，分析耗时过长。请稍后再试。");
+                        document.getElementById('loadingState').classList.add('hidden');
+                        return;
                     }
-                } catch (e) { console.log("轮询检测中..."); }
-            }, 5000); 
+
+                    try {
+                        const checkUrl = `${WEBHOOK_CHECK}?page_size=500`;
+                        const res = await fetch(checkUrl);
+                        if (!res.ok) return; 
+                        
+                        const responseData = await res.json();
+                        let records = [];
+                        if (Array.isArray(responseData)) records = responseData;
+                        else if (responseData.data && responseData.data.items) records = responseData.data.items;
+                        else if (responseData.items) records = responseData.items;
+
+                        if (!records || records.length === 0) return;
+
+                        let matchedRecord = records.find(r => {
+                            let fields = r.fields || r;
+                            let nameInFeishu = fields["角色名"];
+                            if (Array.isArray(nameInFeishu)) nameInFeishu = nameInFeishu[0]?.text || nameInFeishu[0];
+                            return String(nameInFeishu).toLowerCase() === inputVal.toLowerCase();
+                        });
+
+                        if (matchedRecord) {
+                            // 查到了！停止轮询
+                            clearInterval(pollInterval);
+                            clearInterval(progressInterval);
+                            let rawData = matchedRecord; 
+                            
+                            localStorage.setItem('lastIPData', JSON.stringify(rawData));
+                            localStorage.setItem('lastIPName', inputVal);
+
+                            progressBar.style.width = '100%'; progressText.innerText = '100%';
+                            statusText.innerText = '飞书入库成功！正在为您渲染...';
+
+                            setTimeout(() => {
+                                document.getElementById('loadingState').classList.add('hidden');
+                                document.getElementById('loadingState').classList.remove('flex');
+                                document.getElementById('resultsContainer').classList.remove('hidden');
+                                renderData(rawData);
+                            }, 800);
+                        }
+                    } catch (e) { console.log("轮询检测中..."); }
+                }, 20000); // 🚀 间隔改成了 20000 毫秒 (20秒)
+                
+            }, 60000); // 强制休眠 60,000 毫秒 (60秒)
         }
 
         function renderData(rawData) {
