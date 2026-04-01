@@ -333,30 +333,33 @@ const WEBHOOK_CHECK = "/api/history";
             }
             document.getElementById('infoModal').classList.remove('hidden');
         }
-// ==========================================
-        // 🔥 升级版：带加密锁的可视化历史档案面板
-        // ==========================================
-        let cachedHistoryRecords = []; // 临时存储拉取到的飞书数据
-
-        async function openHistoryPanel() {
-            // 🔒 1. 密码验证
+async function openHistoryPanel() {
+            // 1. 弹窗问密码
             const pwd = prompt("🔒 机密商业档案检索系统\n请输入最高权限管理员密码：");
-            if (!pwd || btoa(pwd) !== "WmNhYXJvbjMxMjMxMTku") {
-                alert("❌ 密码错误或已取消！非法入侵警告！");
-                return;
-            }
+            if (!pwd) return; // 如果没输直接退出
 
             // 2. 打开弹窗，显示加载状态
             const historyList = document.getElementById('historyList');
             document.getElementById('historyModal').classList.remove('hidden');
-            historyList.innerHTML = '<div class="flex flex-col items-center justify-center py-10"><p class="text-cyan-400 text-lg font-bold animate-pulse mb-2">正在连线飞书中央数据库...</p><p class="text-gray-500 text-sm">正在解密历史档案，请稍候</p></div>';
+            historyList.innerHTML = '<div class="flex flex-col items-center justify-center py-10"><p class="text-cyan-400 text-lg font-bold animate-pulse mb-2">正在连线飞书中央数据库...</p><p class="text-gray-500 text-sm">正在核验安保凭证，请稍候</p></div>';
 
             try {
-                // 3. 直连飞书拉取数据
-                const checkUrl = `${WEBHOOK_CHECK}?page_size=500`;
-                const res = await fetch(checkUrl);
-                if (!res.ok) throw new Error("网络请求失败"); 
+                // 3. 带着密码去敲后端的门（用 POST 请求，密码藏在包裹里）
+                const checkUrl = `/api/history`;
+                const res = await fetch(checkUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pwd })
+                });
+
+                // 如果后端说密码不对，直接弹窗警告并关闭面板
+                if (!res.ok) {
+                    alert("❌ 密码错误或已取消！非法入侵警告！");
+                    closeHistoryModal();
+                    return; 
+                }
                 
+                // 4. 密码对了，顺利拿到数据并渲染列表
                 const responseData = await res.json();
                 let records = [];
                 if (Array.isArray(responseData)) records = responseData;
@@ -368,7 +371,6 @@ const WEBHOOK_CHECK = "/api/history";
                     return;
                 }
 
-                // 4. 数据处理：倒序排列（最新搜的在最上面），并且去重（同一个角色只留最新的一次搜索）
                 records = [...records].reverse();
                 let uniqueRecords = [];
                 let seenNames = new Set();
@@ -386,9 +388,8 @@ const WEBHOOK_CHECK = "/api/history";
                     }
                 }
 
-                cachedHistoryRecords = uniqueRecords; // 存入全局变量供点击调用
+                cachedHistoryRecords = uniqueRecords; 
 
-                // 5. 渲染精美的列表 UI
                 historyList.innerHTML = uniqueRecords.map((r, index) => {
                     let fields = r.fields || r;
                     let name = fields["角色名"];
@@ -396,7 +397,6 @@ const WEBHOOK_CHECK = "/api/history";
                     let score = fields["霸权总分"] || 0;
                     let tier = fields["市场评级"] || 'N/A';
                     
-                    // 根据评级换颜色
                     let tierColor = tier.includes('S') ? 'text-green-400' : (tier.includes('A') ? 'text-blue-400' : 'text-yellow-500');
 
                     return `

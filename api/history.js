@@ -1,14 +1,24 @@
 // api/history.js
 export default async function handler(req, res) {
-    // 🔒 核心机密：飞书的轮询/读取链接，藏在环境变量里
+    // 1. 强制要求必须是 POST 请求（为了安全传输密码）
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: '非法请求方式' });
+    }
+
+    // 2. 接收前端传过来的密码
+    const { password } = req.body;
+
+    // 3. 终极核验：跟 Vercel 环境变量里的真密码比对
+    if (password !== process.env.ADMIN_PASSWORD) {
+        return res.status(401).json({ error: '❌ 密码错误，拒绝访问飞书机密库！' });
+    }
+
+    // 4. 密码正确，放行拿数据！
     const feishuUrl = process.env.N8N_CHECK_URL + "?page_size=500";
 
     try {
-        // 后端悄悄去飞书拿数据
         const response = await fetch(feishuUrl);
         const data = await response.json();
-        
-        // 拿到后，原封不动地端给前端
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json({ error: '数据库读取失败' });
