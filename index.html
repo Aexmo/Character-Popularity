@@ -244,18 +244,66 @@
         });
 
         const metricsDict = {
-            'global_score': { title: '综合霸权总分', source: '加权模型', desc: '该角色的终极商业潜能评级。<br><br><strong style="color:#10b981;">S-Tier (80分以上)</strong>：绝对的摇钱树，闭眼接周边。<br><strong style="color:#3b82f6;">A-Tier (60-80分)</strong>：优秀中坚力量。<br><strong style="color:#f59e0b;">B-Tier及以下</strong>：商业化需谨慎。' },
-            '社区底盘': { title: '社区底盘', source: '动漫数据库', desc: '反映核心死忠粉规模，是长尾变现的基石。' },
-            '视觉同人': { title: '视觉同人产出', source: '图库数据聚合', desc: '反映外观设计成功度，决定周边销量下限。' },
-            '视频破圈': { title: '视频破圈传播', source: '短视频聚合', desc: '跨圈层吸引大众的能力，适合快消品联名。' },
-            '剧情厚度': { title: '剧情厚度', source: '维基百科', desc: '人设的丰满程度，赋予周边情感溢价。' },
-            '即时热度': { title: '即时热度', source: '全网趋势风向', desc: '反映近期关注度，决定是否适合马上开团预售。' },
-            'tiktok': { title: 'TikTok 爆款指数', source: '短视频变现模型', desc: '极高带货与切片分发潜力。' },
-            'merch': { title: '周边开发指数', source: '变现模型', desc: '直观预判角色实体商品（手办、立牌）转化率。' },
-            'social': { title: 'CP 二创裂变指数', source: '变现模型', desc: '衡量羁绊讨论热度，适合出双人捆绑周边。' },
-            'ai_archetype': { title: '核心人设原型', source: '大模型推演', desc: '指导品牌联动时的“人设与调性匹配度”。' },
-            'ai_gapmoe': { title: '反差萌卖点', source: '大模型推演', desc: '击穿受众心理防线，直接指导带货通稿。' },
-            'ai_emotion': { title: '受众情绪价值', source: '大模型推演', desc: '剖析粉丝氪金心理，把控周边设计基调。' }
+            'global_score': { 
+                title: '综合霸权总分 (Global Verdict)', 
+                source: '多维数据综合加权模型 (雷达60% + 商业40%)', 
+                desc: '该角色的终极商业潜能评级。<br><br><strong style="color:#10b981;">S-Tier (80分以上)</strong>：绝对的摇钱树，拥有极强且全面的变现能力，闭眼接快消品联名和高客单价全品类周边。<br><strong style="color:#3b82f6;">A-Tier (60-80分)</strong>：优秀的中坚力量，某几项指标突出，适合垂直品类开发。<br><strong style="color:#f59e0b;">B-Tier及以下</strong>：通常指在特定小圈子内活跃，或是过气老IP，商业化需谨慎，切忌盲目囤货压库存。' 
+            },
+            '社区底盘': { 
+                title: '社区底盘 (Community Foundation)', 
+                source: 'MyAnimeList, AniList 等核心动漫数据库', 
+                desc: '反映角色在硬核二次元受众中的“死忠粉”规模和忠诚度。<br><br>分数越高，说明受众越稳固，不会因为短期没有动画播出就迅速被遗忘。这是 IP 能够进行<strong style="color:#00f2fe;">长尾变现（长线赚钱）</strong>的最底层基石。底盘高的角色，出谷子（周边）永远有核心粉丝兜底。' 
+            },
+            '视觉同人': { 
+                title: '视觉同人产出 (Visual Art & Fanart)', 
+                source: 'Danbooru, Pixiv 等图库数据聚合', 
+                desc: '反映全球画师对该角色的创作热情与“涩气/审美”认可度。<br><br>分数越高，说明角色的外观设计极其成功，极具视觉吸引力。这是决定该角色是否能制作<strong style="color:#00f2fe;">手办、立牌、徽章（吧唧）甚至服装印花</strong>等实体周边最直接的先行指标！' 
+            },
+            '视频破圈': { 
+                title: '视频破圈传播 (Video Virality)', 
+                source: 'TikTok, YouTube 播放互动聚合', 
+                desc: '反映角色跨出二次元核心圈层、吸引“泛大众用户”的能力。<br><br>破圈分越高的角色，越适合开展<strong style="color:#00f2fe;">快消品联名（奶茶、快餐）和游戏买量宣发</strong>。这种角色自带流量，能够极大地降低品牌的获客和营销成本。' 
+            },
+            '剧情厚度': { 
+                title: '剧情厚度 (Lore Depth)', 
+                source: 'Fandom Wiki 等硬核维基字数统计', 
+                desc: '反映角色人设的丰满程度与成长线的深度。<br><br>单薄的角色只能卖脸，但剧情厚度极高的角色，粉丝对 ta 拥有极强的“情感羁绊”。这使得品牌能够进行<strong style="color:#00f2fe;">深度故事化营销</strong>，从而赋予周边产品极高的品牌溢价（粉丝愿意为了情怀付高价）。' 
+            },
+            '即时热度': { 
+                title: '即时热度 (Immediate Search Trend)', 
+                source: 'Google Trends 全网趋势风向', 
+                desc: '反映角色近期在全球搜索引擎上的热度风向标。<br><br>这是一个<strong style="color:#00f2fe;">时机指标</strong>。如果热度处于高位，说明近期有动画更新、大事件或出圈爆梗，是品牌“蹭热点”进行营销宣发、上架预售的最佳窗口期。' 
+            },
+            'tiktok': { 
+                title: 'TikTok 短视频爆款指数', 
+                source: '短视频双轨制变现计算模型', 
+                desc: '判定角色是否具备短视频病毒式传播潜质。<br><br>高分角色极其适合应用于短视频带货、二创切片投流、Cosplay 变装挑战。这类角色通常具有极其吸睛的外观或强烈的反差动作（如：换装、舞蹈卡点），能够迅速抓住用户眼球。' 
+            },
+            'merch': { 
+                title: '周边开发指数 (Merchandise Viability)', 
+                source: '视觉基数 × 变体数量 × 属性加权', 
+                desc: '直观预判角色实体商品的转化率与开模可行性。<br><br>系统深度考量了角色的服装变体数量（换装多意味着能出更多不同款的周边）。分数越高，开模做手办、立牌的稳赚概率越大，是厂商防坑的绝对核心指标。' 
+            },
+            'social': { 
+                title: 'CP 二创裂变指数 (Social & Shipping)', 
+                source: '剧情厚度 × 粉丝互动关系活跃度', 
+                desc: '衡量角色引发粉丝自发产出“同人羁绊关系（CP组合）”的能力。<br><br>高分代表粉丝极度热衷于讨论 ta 的人际关系。这种角色<strong style="color:#00f2fe;">极其适合“捆绑销售”</strong>——出双人立牌、互动徽章、或者举办线下主题咖啡厅（Cafe）联动，通过 CP 效应榨取双倍利润。' 
+            },
+            'ai_archetype': { 
+                title: '核心人设原型 (AI Core Archetype)', 
+                source: 'Claude KIE 引擎维基生肉推演', 
+                desc: '由大模型根据数万字外网维基资料提炼的底层人设词条。<br><br>直接用于指导品牌联动时的<strong style="color:#00f2fe;">“人设与品牌调性匹配度”</strong>。例如：冷酷刺客型适合联动电竞外设或潮牌；元气吃货型适合联动零食连锁；病娇型适合特定香水或美妆。' 
+            },
+            'ai_gapmoe': { 
+                title: '反差萌卖点 (AI Gap Moe Analysis)', 
+                source: 'Claude KIE 引擎剧情高光提取', 
+                desc: '二次元造神与刺激消费的绝对核心驱动力！<br><br>“反差萌”是击穿受众心理防线、让粉丝愿意爆金币的最强武器。这部分解析直接指导了文案团队该如何撰写带货营销通稿，以及视频团队该设计怎样的短视频切片剧本。' 
+            },
+            'ai_emotion': { 
+                title: '受众情绪价值 (AI Emotional Resonance)', 
+                source: 'Claude KIE 引擎粉圈心理测写', 
+                desc: '深层剖析粉丝到底是基于什么心理在为这个角色掏钱。<br><br>是出于慕强的崇拜？怜爱的保护欲？还是理想化自我的代入？明确情绪价值，产品设计师才能精准把控周边的“设计基调”（是做帅气的战斗手办，还是做可爱的趴趴公仔）。' 
+            }
         };
 
         function closeModal() { document.getElementById('infoModal').classList.add('hidden'); }
