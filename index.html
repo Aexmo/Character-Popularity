@@ -503,8 +503,16 @@ async function openHistoryPanel() {
                         return;
                     }
                     try {
-                        const checkUrl = `${WEBHOOK_CHECK}?page_size=500`;
-                        const res = await fetch(checkUrl);
+                        // 🔥 终极防缓存大招：加上时间戳后缀，并强制声明不使用任何缓存
+const checkUrl = `${WEBHOOK_CHECK}?page_size=500&_t=${new Date().getTime()}`;
+const res = await fetch(checkUrl, { 
+    cache: 'no-store', 
+    headers: { 
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    } 
+});
                         if (!res.ok) return; 
                         
                         const responseData = await res.json();
