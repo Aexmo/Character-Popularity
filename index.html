@@ -6,7 +6,6 @@
     <title>IP 商业潜力雷达系统 - 旗舰满血版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             background-color: #05050a; 
@@ -231,106 +230,10 @@
         </div>
     </div>
 
-    <div id="historyModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-black/80 backdrop-blur-md transition-opacity">
-        <div class="modal-box p-6 max-w-2xl w-full mx-4 relative max-h-[80vh] flex flex-col border border-cyan-500/30 shadow-[0_0_30px_rgba(0,242,254,0.15)]">
-            <button onclick="closeHistoryModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white bg-gray-800/50 hover:bg-gray-700 rounded-full w-8 h-8 flex items-center justify-center transition-colors">✕</button>
-            <h3 class="text-2xl font-black text-white mb-2 flex items-center gap-2">
-                <span class="text-cyan-400">📚</span> 机密商业档案室
-            </h3>
-            <p class="text-gray-400 text-sm mb-4 pb-4 border-b border-gray-700">直连飞书数据库，点击即可一键无损还原大屏渲染（不消耗算力额度）。</p>
-            <div id="historyList" class="overflow-y-auto pr-2 flex flex-col gap-3 custom-scrollbar"></div>
-        </div>
-    </div>
-
-    <div id="authModal" class="fixed inset-0 z-[110] flex items-center justify-center hidden bg-black/80 backdrop-blur-md transition-opacity">
-        <div class="modal-box p-8 max-w-md w-full mx-4 border border-indigo-500/30 shadow-[0_0_40px_rgba(79,70,229,0.2)] bg-[#0d1117]/90 rounded-2xl relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white text-xl">✕</button>
-            <h3 id="authTitle" class="text-2xl font-black text-white mb-6 text-center">🔐 开启深度挖掘权限</h3>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-gray-400 text-xs mb-1 ml-1">工作邮箱</label>
-                    <input type="email" id="authEmail" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none transition-all" placeholder="name@company.com">
-                </div>
-                <div>
-                    <label class="block text-gray-400 text-xs mb-1 ml-1">访问密码 (至少6位)</label>
-                    <input type="password" id="authPassword" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none transition-all" placeholder="••••••••">
-                </div>
-                
-                <button onclick="handleAuth()" id="authBtn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl shadow-lg transition-all mt-4">
-                    进入系统
-                </button>
-                
-                <p class="text-center text-sm text-gray-500 mt-4">
-                    <span id="authToggleHint">还没有账号？</span>
-                    <button onclick="toggleAuthMode()" id="authToggleBtn" class="text-indigo-400 hover:text-indigo-300 font-bold ml-1">立即注册</button>
-                </p>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // ==========================================
-        // 🔐 Supabase 账户与计费系统初始化
-        // ==========================================
-        const supabaseUrl = 'https://cbiltyjxkcyjhmhzkbybz.supabase.co';
-        const supabaseKey = 'sb_publishable_wvYHfovsey8ydn7CzBduOw_KP1pKzbv';
-        // 👇 修复点：改名为 supabaseClient，并调用 window.supabase 避免冲突！
-        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-        let isSignUpMode = false;
-        let currentUser = null; 
-
-        function toggleAuthMode() {
-            isSignUpMode = !isSignUpMode;
-            document.getElementById('authTitle').innerText = isSignUpMode ? '📝 创建你的商业账户' : '🔐 开启深度挖掘权限';
-            document.getElementById('authBtn').innerText = isSignUpMode ? '完成注册' : '进入系统';
-            document.getElementById('authToggleHint').innerText = isSignUpMode ? '已有账号？' : '还没有账号？';
-            document.getElementById('authToggleBtn').innerText = isSignUpMode ? '直接登录' : '立即注册';
-        }
-
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.add('hidden');
-        }
-
-        async function handleAuth() {
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
-            const btn = document.getElementById('authBtn');
-
-            if (!email || !password) return alert("⚠️ 请完整填写邮箱和密码！");
-            
-            btn.innerText = "正在同步云端...";
-            btn.disabled = true;
-
-            try {
-                if (isSignUpMode) {
-                    // 👇 修复点：使用新的 supabaseClient
-                    const { data, error } = await supabaseClient.auth.signUp({ email, password });
-                    if (error) throw error;
-                    alert("✅ 注册成功！请去邮箱查收验证链接（注意看垃圾箱）。验证后即可登录！\n(如果后台没强制要求验证，现在就可以直接登录了)");
-                    toggleAuthMode();
-                } else {
-                    // 👇 修复点：使用新的 supabaseClient
-                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                    alert("🎉 登录成功！欢迎进入 IP 雷达系统。");
-                    closeAuthModal();
-                    currentUser = data.user;
-                }
-            } catch (e) {
-                alert("❌ 操作失败：" + e.message);
-            } finally {
-                btn.innerText = isSignUpMode ? '完成注册' : '进入系统';
-                btn.disabled = false;
-            }
-        }
-
-        // ==========================================
-        // 🚀 原生大屏逻辑
-        // ==========================================
-        const WEBHOOK_START = "/api/search"; 
-        const WEBHOOK_CHECK = "/api/history";
+// 🔒 安全升级：真实 URL 已转移至后端加密环境变量
+const WEBHOOK_START = "/api/search"; 
+const WEBHOOK_CHECK = "/api/history";
         
         let radarChartInstance = null;
         let trendChartInstance = null;
@@ -430,16 +333,18 @@
             }
             document.getElementById('infoModal').classList.remove('hidden');
         }
-
-        async function openHistoryPanel() {
+async function openHistoryPanel() {
+            // 1. 弹窗问密码
             const pwd = prompt("🔒 机密商业档案检索系统\n请输入最高权限管理员密码：");
-            if (!pwd) return; 
+            if (!pwd) return; // 如果没输直接退出
 
+            // 2. 打开弹窗，显示加载状态
             const historyList = document.getElementById('historyList');
             document.getElementById('historyModal').classList.remove('hidden');
             historyList.innerHTML = '<div class="flex flex-col items-center justify-center py-10"><p class="text-cyan-400 text-lg font-bold animate-pulse mb-2">正在连线飞书中央数据库...</p><p class="text-gray-500 text-sm">正在核验安保凭证，请稍候</p></div>';
 
             try {
+                // 3. 带着密码去敲后端的门（用 POST 请求，密码藏在包裹里）
                 const checkUrl = `/api/history`;
                 const res = await fetch(checkUrl, {
                     method: 'POST',
@@ -447,12 +352,14 @@
                     body: JSON.stringify({ password: pwd })
                 });
 
+                // 如果后端说密码不对，直接弹窗警告并关闭面板
                 if (!res.ok) {
                     alert("❌ 密码错误或已取消！非法入侵警告！");
                     closeHistoryModal();
                     return; 
                 }
                 
+                // 4. 密码对了，顺利拿到数据并渲染列表
                 const responseData = await res.json();
                 let records = [];
                 if (Array.isArray(responseData)) records = responseData;
@@ -514,37 +421,40 @@
             }
         }
 
+        // 🎯 点击列表某一项后，一键上屏渲染
         function renderSpecificHistory(index) {
             const record = cachedHistoryRecords[index];
             if (!record) return;
 
+            // 关闭弹窗
             closeHistoryModal();
+            
+            // 直接显示数据容器
             document.getElementById('loadingState').classList.add('hidden');
             document.getElementById('resultsContainer').classList.remove('hidden');
             
+            // 把搜索框里的字换成这个角色的名字
             let fields = record.fields || record;
             let name = fields["角色名"];
             if (Array.isArray(name)) name = name[0]?.text || name[0];
             document.getElementById('searchInput').value = name;
             
+            // 写入本地缓存，刷新网页还在
             localStorage.setItem('lastIPData', JSON.stringify(record));
             localStorage.setItem('lastIPName', name);
 
+            // 瞬间渲染大屏
             renderData(record);
+            
+            // 丝滑滚动到最顶部
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // ❌ 关闭弹窗
         function closeHistoryModal() {
             document.getElementById('historyModal').classList.add('hidden');
         }
-
         async function startSearch() {
-            // 🔥 新增：核心门禁逻辑！如果没登录，直接弹窗拦住！
-            if (!currentUser) {
-                document.getElementById('authModal').classList.remove('hidden');
-                return;
-            }
-
             const inputVal = document.getElementById('searchInput').value.trim();
             if (!inputVal) return alert("请输入角色名称！");
 
@@ -644,7 +554,11 @@
             document.getElementById('charCategory').innerText = fields["IP类别"] || 'N/A';
             document.getElementById('charScore').innerText = fields["霸权总分"] || 0;
             document.getElementById('charTier').innerText = fields["市场评级"] || 'N/A';
+            
+            // 🔥 新增：生命周期渲染
             document.getElementById('charLifecycle').innerText = fields["生命周期"] || '未知周期';
+            
+            // 🔥 新增：商业变现定调渲染
             document.getElementById('commercialVerdict').innerText = fields["商业变现定调"] || '正在生成多维度商业判断...';
 
             let avatarObj = fields["主视觉图"];
@@ -661,6 +575,7 @@
             document.getElementById('aiGapMoe').innerText = fields["反差萌卖点"] || "暂无数据";
             document.getElementById('aiEmotion').innerText = fields["受众情绪价值"] || "暂无数据";
 
+            // 解析标签（支持原生数组，或被飞书存成的 "A | B | C" 字符串格式）
             const parseStrToArray = (str) => {
                 if (Array.isArray(str)) return str;
                 if (typeof str === 'string' && str !== "暂无数据" && str !== "暂无") return str.split(/ \| |\|/).map(s=>s.trim()).filter(Boolean);
@@ -682,6 +597,7 @@
             renderAITags('aiVisuals', parseStrToArray(fields["高频变现视觉符号"] || fields["变现视觉符号"]));
             renderAITags('aiDerivatives', parseStrToArray(fields["高潜二创方向"]));
 
+            // 🔥 新增：基础属性标签库渲染（容错极高，防止飞书改列名）
             renderNormalTags('tagsVisual', parseStrToArray(fields["视觉与外观特征"] || fields["视觉外观特征"] || ""));
             renderNormalTags('tagsPersona', parseStrToArray(fields["性格与专长设定"] || fields["性格底色与行为"] || ""));
             renderNormalTags('tagsResonance', parseStrToArray(fields["社交动态与共鸣"] || ""));
@@ -753,5 +669,17 @@
         }
         window.addEventListener('resize', () => { if(radarChartInstance) radarChartInstance.resize(); if(trendChartInstance) trendChartInstance.resize(); });
     </script>
+    <div id="historyModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-black/80 backdrop-blur-md transition-opacity">
+        <div class="modal-box p-6 max-w-2xl w-full mx-4 relative max-h-[80vh] flex flex-col border border-cyan-500/30 shadow-[0_0_30px_rgba(0,242,254,0.15)]">
+            <button onclick="closeHistoryModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white bg-gray-800/50 hover:bg-gray-700 rounded-full w-8 h-8 flex items-center justify-center transition-colors">✕</button>
+            <h3 class="text-2xl font-black text-white mb-2 flex items-center gap-2">
+                <span class="text-cyan-400">📚</span> 机密商业档案室
+            </h3>
+            <p class="text-gray-400 text-sm mb-4 pb-4 border-b border-gray-700">直连飞书数据库，点击即可一键无损还原大屏渲染（不消耗算力额度）。</p>
+            
+            <div id="historyList" class="overflow-y-auto pr-2 flex flex-col gap-3 custom-scrollbar">
+                </div>
+        </div>
+    </div>
 </body>
 </html>
